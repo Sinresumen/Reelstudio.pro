@@ -244,15 +244,15 @@ export default function LandingPage() {
           <div className="flex flex-wrap items-center justify-center gap-6">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Trophy className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium">100+ Proyectos</span>
+              <span className="text-sm font-medium">{(config as any)?.siteContent?.trustIndicators?.projects || '100+ Proyectos'}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Star className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium">5.0 Calificación</span>
+              <span className="text-sm font-medium">{(config as any)?.siteContent?.trustIndicators?.rating || '5.0 Calificación'}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Zap className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium">Entrega Rápida</span>
+              <span className="text-sm font-medium">{(config as any)?.siteContent?.trustIndicators?.delivery || 'Entrega Rápida'}</span>
             </div>
           </div>
         </div>

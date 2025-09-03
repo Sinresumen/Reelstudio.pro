@@ -125,6 +125,11 @@ export type SiteContent = {
   calculatorDescription?: string;
   backgroundImageUrl?: string;
   customCSS?: string;
+  trustIndicators?: {
+    projects?: string;
+    rating?: string;
+    delivery?: string;
+  };
 };
 
 // Messaging configuration type

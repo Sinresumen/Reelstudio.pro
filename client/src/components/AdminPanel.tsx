@@ -145,6 +145,9 @@ export default function AdminPanel() {
     const logoUrl = (document.getElementById('logo-url') as HTMLInputElement)?.value;
     const backgroundImageUrl = (document.getElementById('background-image-url') as HTMLInputElement)?.value;
     const customCSS = (document.getElementById('custom-css') as HTMLTextAreaElement)?.value;
+    const trustProjects = (document.getElementById('trust-projects') as HTMLInputElement)?.value;
+    const trustRating = (document.getElementById('trust-rating') as HTMLInputElement)?.value;
+    const trustDelivery = (document.getElementById('trust-delivery') as HTMLInputElement)?.value;
 
     updateConfigMutation.mutate({
       ...config,
@@ -159,6 +162,11 @@ export default function AdminPanel() {
         logoUrl,
         backgroundImageUrl,
         customCSS,
+        trustIndicators: {
+          projects: trustProjects,
+          rating: trustRating,
+          delivery: trustDelivery,
+        },
       },
     });
   };
@@ -522,6 +530,45 @@ export default function AdminPanel() {
             className="bg-input border-border focus:border-primary"
             data-testid="textarea-company-description"
           />
+        </div>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Indicadores de Confianza</h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="trust-projects">Proyectos Completados</Label>
+            <Input
+              id="trust-projects"
+              type="text"
+              defaultValue={config?.siteContent?.trustIndicators?.projects}
+              placeholder="100+ Proyectos"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-trust-projects"
+            />
+          </div>
+          <div>
+            <Label htmlFor="trust-rating">Calificación</Label>
+            <Input
+              id="trust-rating"
+              type="text"
+              defaultValue={config?.siteContent?.trustIndicators?.rating}
+              placeholder="5.0 Calificación"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-trust-rating"
+            />
+          </div>
+          <div>
+            <Label htmlFor="trust-delivery">Entrega</Label>
+            <Input
+              id="trust-delivery"
+              type="text"
+              defaultValue={config?.siteContent?.trustIndicators?.delivery}
+              placeholder="Entrega Rápida"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-trust-delivery"
+            />
+          </div>
         </div>
         <Button 
           onClick={handleSiteContentUpdate}
