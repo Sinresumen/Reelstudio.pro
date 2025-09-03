@@ -1,190 +1,303 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Phone, Play, Sparkles, Zap, Trophy, Star, ArrowRight, CheckCircle } from 'lucide-react';
 import { useConfig } from '@/contexts/ConfigContext';
-import { useLocation } from 'wouter';
 import PriceCalculator from './PriceCalculator';
-import AdminAuth from './AdminAuth';
-import { Video, Phone } from 'lucide-react';
 
 export default function LandingPage() {
   const { config } = useConfig();
-  const [, setLocation] = useLocation();
-  const [showAdminAuth, setShowAdminAuth] = React.useState(false);
-  const [logoClickCount, setLogoClickCount] = React.useState(0);
 
-  const handleLogoClick = () => {
-    setLogoClickCount(prev => {
-      const newCount = prev + 1;
-      if (newCount === 5) {
-        setShowAdminAuth(true);
-        return 0;
-      }
-      return newCount;
-    });
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleWhatsAppContact = () => {
     if (config?.whatsappNumber) {
-      const message = 'Hola, me interesa conocer más sobre sus servicios de producción de video.';
+      const message = `Hola, me interesa conocer más sobre sus servicios de video profesional.`;
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${config.whatsappNumber.replace(/\s+/g, '')}&text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // Helper functions to safely access nested properties
-  const getSiteContent = (key: string) => {
-    return config?.siteContent && typeof config.siteContent === 'object' && key in config.siteContent
-      ? (config.siteContent as any)[key]
-      : null;
-  };
-
-  const getSampleVideos = () => {
-    return config?.sampleVideos && Array.isArray(config.sampleVideos) ? config.sampleVideos : [];
-  };
-
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Fire particles background */}
-      <div className="fire-particles fixed inset-0 pointer-events-none">
-        <div className="fire-particle" style={{ left: '10%', animationDelay: '0s', animationDuration: '4s' }}></div>
-        <div className="fire-particle" style={{ left: '20%', animationDelay: '1s', animationDuration: '5s' }}></div>
-        <div className="fire-particle" style={{ left: '30%', animationDelay: '2s', animationDuration: '6s' }}></div>
-        <div className="fire-particle" style={{ left: '70%', animationDelay: '3s', animationDuration: '4.5s' }}></div>
-        <div className="fire-particle" style={{ left: '80%', animationDelay: '4s', animationDuration: '5.5s' }}></div>
-        <div className="fire-particle" style={{ left: '90%', animationDelay: '5s', animationDuration: '4.2s' }}></div>
-      </div>
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Hero Section with Animated Background */}
+      <section className="relative min-h-[90vh] flex items-center justify-center">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 via-red-900/10 to-background"></div>
+        
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px)`,
+          }}></div>
+        </div>
 
-      {/* Custom background image if set */}
-      {config?.siteContent && 'backgroundImageUrl' in config.siteContent && config.siteContent.backgroundImageUrl && (
-        <div 
-          className="fixed inset-0 opacity-30 bg-cover bg-center"
-          style={{ backgroundImage: `url(${config.siteContent.backgroundImageUrl})` }}
-        ></div>
-      )}
-
-      {/* Simple Header */}
-      <header className="relative z-10 py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center">
-            <button 
-              onClick={handleLogoClick}
-              className="flex items-center space-x-4 cursor-pointer"
-              data-testid="logo-videoventa"
+        {/* Floating particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${15 + Math.random() * 10}s`,
+              }}
             >
-              {config?.siteContent?.logoUrl ? (
-                <img 
-                  src={config.siteContent.logoUrl} 
-                  alt="Logo" 
-                  className="w-12 h-12 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
-                  <Video className="text-white" size={24} />
+              <div className="w-1 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full opacity-60"></div>
+            </div>
+          ))}
+        </div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-5xl mx-auto animate-fade-in-up">
+            {/* Animated badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-primary/20 mb-8 animate-pulse-glow">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Producción Profesional</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+              <span className="inline-block animate-text-gradient bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent animate-gradient" style={{ backgroundSize: '300%' }}>
+                {(config as any)?.siteContent?.heroTitle || 'Videos que Impulsan'}
+              </span>
+              <br />
+              <span className="text-3xl md:text-5xl lg:text-6xl text-foreground/80">
+                Tu Marca al Siguiente Nivel
+              </span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              {(config as any)?.siteContent?.heroDescription || 'Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.'}
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <Button
+                onClick={() => scrollToSection('calculator')}
+                size="lg"
+                className="group relative overflow-hidden bg-gradient-to-r from-orange-500 to-red-600 text-white border-0 px-8 py-6 text-lg font-semibold shadow-2xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105"
+                data-testid="button-hero-calculate"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  Calcular Precio
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </Button>
+
+              <Button
+                onClick={handleWhatsAppContact}
+                size="lg"
+                variant="outline"
+                className="group border-2 border-primary/50 hover:border-primary px-8 py-6 text-lg font-semibold backdrop-blur-sm hover:scale-105 transition-all duration-300"
+                data-testid="button-hero-whatsapp"
+              >
+                <Phone className="mr-2 w-5 h-5 group-hover:rotate-12 transition-transform" />
+                Contactar Ahora
+              </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+              {[
+                { icon: Trophy, text: "100+ Proyectos" },
+                { icon: Star, text: "5.0 Calificación" },
+                { icon: Zap, text: "Entrega Rápida" }
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-muted-foreground">
+                  <item.icon className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium">{item.text}</span>
                 </div>
-              )}
-              <span className="text-3xl font-bold fire-text">{config?.businessName || 'VideoVenta'}</span>
-            </button>
+              ))}
+            </div>
           </div>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="relative py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-orange-900/20 to-yellow-900/20"></div>
-        
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 animate-fire-flicker">
-              <span className="fire-text">{config?.siteContent?.heroTitle?.split(' ').slice(0, 2).join(' ') || 'Producción de'}</span>
-              <br />
-              <span className="text-white">{config?.siteContent?.heroTitle?.split(' ').slice(2).join(' ') || 'Videos Profesionales'}</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto">
-              {config?.siteContent?.heroDescription || 'Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.'}
-            </p>
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-scroll-down"></div>
           </div>
         </div>
       </section>
 
-      {/* Sample Videos Section - Simplified */}
-      <section className="py-20 bg-card/50">
+      {/* Sample Videos Section */}
+      <section className="py-20 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="fire-text">Nuestros Videos</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                Nuestro Trabajo
+              </span>
             </h2>
+            <p className="text-xl text-muted-foreground">
+              Ejemplos de producciones que hemos realizado
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {config?.sampleVideos?.slice(0, 3).map((video: any, index: number) => (
-              <Card key={video.id || index} className="glass-card fire-border hover:scale-105 transition-transform overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-red-900/50 to-orange-900/50 relative">
-                  <img 
-                    src={video.thumbnail} 
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                    data-testid={`img-sample-video-${index}`}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-lg font-semibold text-white mb-2">{video.title}</h3>
-                    <p className="text-sm text-gray-300">{video.description}</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            {(config as any)?.sampleVideos?.map((video: any, index: number) => (
+              <div
+                key={video.id || index}
+                className="group relative transform transition-all duration-500 hover:scale-105 hover:-translate-y-2"
+                style={{ animationDelay: `${index * 0.1}s` }}
+                data-testid={`card-video-${index}`}
+              >
+                <Card className="overflow-hidden bg-gradient-to-br from-card to-card/50 border-primary/20 shadow-xl hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500">
+                  {/* Video thumbnail with overlay */}
+                  <div className="relative aspect-video overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 to-red-600/30 mix-blend-overlay"></div>
+                    
+                    {/* Play button overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                      <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
+                          <Play className="text-white w-8 h-8 ml-1" fill="white" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Category badge */}
+                    <div className="absolute top-4 left-4 z-20">
+                      <span className="px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs font-semibold">
+                        {video.category || 'Promocional'}
+                      </span>
+                    </div>
+
+                    {video.thumbnail ? (
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-orange-900/50 to-red-900/50"></div>
+                    )}
                   </div>
-                </div>
-              </Card>
+
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                      {video.title}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {video.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Price Calculator Section - Simplified */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/10 via-red-900/10 to-yellow-900/10"></div>
-        
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Features Section */}
+      <section className="py-20 bg-gradient-to-b from-background to-background/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="fire-text">{config?.siteContent?.calculatorTitle || 'Calculadora de Precios'}</span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                ¿Por Qué Elegirnos?
+              </span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {config?.siteContent?.calculatorDescription || 'Obtén una cotización instantánea personalizada para tu proyecto'}
+            <p className="text-xl text-muted-foreground">
+              Características que nos hacen únicos
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
-            <Card className="glass-card fire-border p-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Sparkles,
+                title: "Calidad Premium",
+                description: "Videos en alta definición con edición profesional",
+                gradient: "from-yellow-500 to-orange-500"
+              },
+              {
+                icon: Zap,
+                title: "Entrega Rápida",
+                description: "Tiempos de entrega flexibles según tu necesidad",
+                gradient: "from-orange-500 to-red-500"
+              },
+              {
+                icon: Trophy,
+                title: "100% Personalizado",
+                description: "Cada proyecto adaptado a tu marca y objetivos",
+                gradient: "from-red-500 to-pink-500"
+              }
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="group relative"
+                data-testid={`feature-card-${index}`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+                <Card className="relative h-full p-8 bg-card/50 backdrop-blur-sm border-primary/20 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1">
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} p-1 mb-6`}>
+                    <div className="w-full h-full rounded-xl bg-background flex items-center justify-center">
+                      <feature.icon className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                </Card>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Calculator Section */}
+      <section id="calculator" className="py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-orange-900/5 to-red-900/5"></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-primary/20 mb-6">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Cotización Instantánea</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                {(config as any)?.siteContent?.calculatorTitle || 'Calcula tu Inversión'}
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {(config as any)?.siteContent?.calculatorDescription || 'Obtén un presupuesto instantáneo y transparente para tu proyecto de video'}
+            </p>
+          </div>
+
+          <div className="max-w-6xl mx-auto">
+            <Card className="p-8 bg-card/80 backdrop-blur-sm border-primary/20 shadow-2xl">
               <PriceCalculator />
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Footer - Minimal */}
-      <footer className="bg-card border-t border-border py-8">
+      {/* Footer */}
+      <footer className="py-12 border-t border-border/50 bg-gradient-to-b from-background to-background/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-muted-foreground">
-            <p>&copy; 2024 {config?.businessName || 'VideoVenta'}. Todos los derechos reservados.</p>
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">
+              {(config as any)?.siteContent?.companyDescription || 'Creamos contenido audiovisual profesional que impulsa tu marca'}
+            </p>
+            {(config as any)?.siteContent?.contactEmail && (
+              <p className="text-sm text-muted-foreground">
+                Email: {(config as any).siteContent.contactEmail}
+              </p>
+            )}
+            <div className="mt-6">
+              <p className="text-sm text-muted-foreground/60">
+                © 2024 {config?.businessName || 'VideoVenta'}. Todos los derechos reservados.
+              </p>
+            </div>
           </div>
         </div>
       </footer>
-
-      {/* Custom CSS */}
-      {config?.siteContent?.customCSS && (
-        <style dangerouslySetInnerHTML={{ __html: config.siteContent.customCSS }} />
-      )}
-
-      {/* Admin Authentication Modal */}
-      {showAdminAuth && (
-        <AdminAuth onClose={() => setShowAdminAuth(false)} />
-      )}
     </div>
   );
 }
