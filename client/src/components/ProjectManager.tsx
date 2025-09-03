@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Link, FileVideo, Download, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Link, FileVideo, Download, Package, Eye } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -156,8 +156,18 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
       return;
     }
 
+    // Asegurarse de que la URL tenga protocolo
+    let formattedUrl = newLink.url.trim();
+    if (!formattedUrl.match(/^https?:\/\//i)) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+
     const currentLinks = selectedProject.downloadLinks || [];
-    const updatedLinks = [...currentLinks, { ...newLink, id: Date.now().toString() }];
+    const updatedLinks = [...currentLinks, { 
+      title: newLink.title,
+      url: formattedUrl,
+      id: Date.now().toString() 
+    }];
     
     updateProjectMutation.mutate({
       id: selectedProject.id,
@@ -475,23 +485,35 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                     <div className="space-y-2">
                       {selectedProject.downloadLinks.map((link: any) => (
                         <div key={link.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 flex-1">
                             <FileVideo className="text-primary" size={20} />
-                            <div>
+                            <div className="flex-1">
                               <p className="font-medium">{link.title}</p>
+                              <p className="text-xs text-muted-foreground break-all">{link.url}</p>
                               {link.size && (
                                 <p className="text-sm text-muted-foreground">{link.size}</p>
                               )}
                             </div>
                           </div>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-destructive"
-                            onClick={() => handleRemoveLink(link.id)}
-                          >
-                            <Trash2 size={16} />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => window.open(link.url, '_blank')}
+                              title="Probar enlace"
+                            >
+                              <Eye size={16} />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-destructive"
+                              onClick={() => handleRemoveLink(link.id)}
+                              title="Eliminar enlace"
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
