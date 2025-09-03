@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Phone, Video, Music, CheckCircle, Clock, Package, Sparkles, Zap } from 'lucide-react';
+import { Phone, Video, Music, CheckCircle, Clock, Package, Sparkles, Zap, Timer, Users, Gauge } from 'lucide-react';
 
 export default function PriceCalculator() {
   const { config } = useConfig();
@@ -49,7 +49,10 @@ export default function PriceCalculator() {
         const pkg = singingPackages[packageId];
         message = `Hola, me interesa el paquete ${pkg.label} de videos cantados:\n- Precio: $${pkg.mxn?.toLocaleString()} MXN\n- Videos: ${pkg.videos}`;
       } else {
-        message = `Hola, me interesa una cotización para videos narrados:\n- Duración: ${duration} minutos\n- Cantidad: ${quantity} videos\n- Velocidad: ${speed}\n- Total: $${calculatedPrice.totalMXN?.toLocaleString()} MXN`;
+        const durationLabel = narratedPricing?.durations?.[duration]?.label || duration;
+        const quantityLabel = narratedPricing?.quantities?.[quantity]?.label || quantity;
+        const speedLabel = narratedPricing?.speeds?.[speed]?.label || speed;
+        message = `Hola, me interesa una cotización para videos narrados:\n- Duración: ${durationLabel}\n- Cantidad: ${quantityLabel}\n- Velocidad: ${speedLabel}\n- Total: $${calculatedPrice?.totalMXN?.toLocaleString()} MXN`;
       }
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${config.whatsappNumber.replace(/\s+/g, '')}&text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
@@ -57,162 +60,258 @@ export default function PriceCalculator() {
   };
 
   const renderNarratedVideos = () => (
-    <div className="grid lg:grid-cols-2 gap-8">
-      <div className="space-y-6">
-        {/* Duration Selection */}
-        <div className="group">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5 text-primary" />
-            <Label className="text-lg font-semibold">Duración del Video</Label>
-          </div>
-          <RadioGroup value={duration} onValueChange={setDuration} className="space-y-3">
-            {narratedPricing?.durations && Object.entries(narratedPricing.durations).map(([key, value]: [string, any]) => (
-              <div key={key} className="group/item">
-                <RadioGroupItem value={key} id={key} className="peer sr-only" data-testid={`radio-duration-${key}`} />
-                <Label 
-                  htmlFor={key} 
-                  className="flex cursor-pointer rounded-xl border-2 border-border p-5 transition-all duration-300 peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50 hover:bg-card/50"
-                >
-                  <div className="flex w-full items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="text-lg font-semibold">{value.label}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {key === '5-10' && 'Ideal para presentaciones cortas'}
-                        {key === '10-20' && 'Perfecto para contenido promocional'}
-                        {key === '20-30' && 'Documentales y contenido extenso'}
+    <div>
+      {/* Header Section */}
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 mb-4">
+          <Video className="w-4 h-4 text-orange-500" />
+          <span className="text-sm font-medium text-orange-500">Producción Profesional</span>
+        </div>
+        <h3 className="text-3xl font-bold mb-4 bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
+          Videos Narrados Premium
+        </h3>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Contenido audiovisual narrado profesionalmente para tu marca
+        </p>
+      </div>
+
+      {/* Duration Selection Cards */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-6">
+          <Clock className="w-5 h-5 text-orange-500" />
+          <h4 className="text-xl font-semibold">Selecciona la Duración</h4>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {narratedPricing?.durations && Object.entries(narratedPricing.durations).map(([key, value]: [string, any], index: number) => (
+            <div
+              key={key}
+              className={`group relative transform transition-all duration-500 hover:scale-105 hover:-translate-y-2 ${
+                duration === key ? 'scale-105 -translate-y-2' : ''
+              }`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* Popular Badge */}
+              {key === '10-20' && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                  <span className="px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-semibold">
+                    MÁS POPULAR
+                  </span>
+                </div>
+              )}
+
+              <Card 
+                className={`h-full cursor-pointer overflow-hidden transition-all duration-300 ${
+                  duration === key 
+                    ? 'border-2 border-orange-500 bg-gradient-to-br from-orange-900/20 to-red-900/20' 
+                    : 'border-border hover:border-orange-500/50 bg-card/50'
+                }`}
+                onClick={() => setDuration(key)}
+                data-testid={`duration-card-${key}`}
+              >
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    {/* Icon */}
+                    <div className={`mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-r ${
+                      key === '5-10' ? 'from-green-500 to-emerald-600' :
+                      key === '10-20' ? 'from-orange-500 to-red-600' :
+                      'from-purple-500 to-pink-600'
+                    } p-1`}>
+                      <div className="flex h-full w-full items-center justify-center rounded-xl bg-background">
+                        <Timer className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">${value.mxn?.toLocaleString()}</div>
-                      <div className="text-xs text-muted-foreground">MXN</div>
+
+                    {/* Duration Name */}
+                    <h5 className="text-xl font-bold mb-2">{value.label}</h5>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {key === '5-10' && 'Ideal para presentaciones cortas y contenido rápido'}
+                      {key === '10-20' && 'Perfecto para contenido promocional y explicativo'}
+                      {key === '20-30' && 'Documentales completos y contenido extenso'}
+                    </p>
+
+                    {/* Price */}
+                    <div className="mb-4">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                        ${value.mxn?.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-muted-foreground">MXN base</div>
                     </div>
+
+                    {/* Select Button */}
+                    <Button 
+                      className={`w-full ${
+                        duration === key
+                          ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700'
+                          : 'bg-primary/10 text-primary hover:bg-primary/20'
+                      }`}
+                    >
+                      {duration === key ? 'Seleccionado ✓' : 'Seleccionar'}
+                    </Button>
                   </div>
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-
-        {/* Quantity and Speed Selection */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="group">
-            <div className="flex items-center gap-2 mb-3">
-              <Package className="w-5 h-5 text-primary" />
-              <Label className="text-sm font-medium">Cantidad de Videos</Label>
+                </CardContent>
+              </Card>
             </div>
-            <Select value={quantity} onValueChange={setQuantity}>
-              <SelectTrigger className="h-12 bg-card/50 border-border hover:border-primary/50 focus:border-primary transition-colors" data-testid="select-quantity">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {narratedPricing?.quantities && Object.entries(narratedPricing.quantities).map(([key, value]: [string, any]) => (
-                  <SelectItem key={key} value={key} className="py-3">
-                    <div className="flex items-center justify-between w-full">
-                      <span>{value.label}</span>
-                      {value.multiplier > 1 && (
-                        <span className="ml-2 text-xs text-primary">x{value.multiplier}</span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="group">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-5 h-5 text-primary" />
-              <Label className="text-sm font-medium">Velocidad de Entrega</Label>
-            </div>
-            <Select value={speed} onValueChange={setSpeed}>
-              <SelectTrigger className="h-12 bg-card/50 border-border hover:border-primary/50 focus:border-primary transition-colors" data-testid="select-speed">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {narratedPricing?.speeds && Object.entries(narratedPricing.speeds).map(([key, value]: [string, any]) => (
-                  <SelectItem key={key} value={key} className="py-3">
-                    <div className="flex flex-col">
-                      <span>{value.label.split(' - ')[0]}</span>
-                      {value.multiplier > 1 && (
-                        <span className="text-xs text-orange-500">+{Math.round((value.multiplier - 1) * 100)}% costo adicional</span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          ))}
         </div>
+      </div>
 
-        {/* Features Card */}
-        <Card className="overflow-hidden bg-gradient-to-br from-card/80 to-card/50 border-primary/20 backdrop-blur-sm">
+      {/* Options Section */}
+      <div className="grid lg:grid-cols-2 gap-8 mb-10">
+        {/* Quantity Card */}
+        <Card className="overflow-hidden bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-semibold">Incluido en Videos Narrados</h3>
+              <Users className="w-5 h-5 text-orange-500" />
+              <h4 className="text-lg font-semibold">Cantidad de Videos</h4>
             </div>
-            <div className="grid grid-cols-1 gap-3">
-              {narratedPricing?.videoFeatures && narratedPricing.videoFeatures.map((feature: string, index: number) => (
-                <div key={index} className="flex items-start gap-3 group/feature">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-600">
-                    <CheckCircle className="h-4 w-4 text-white" />
+            <div className="grid grid-cols-2 gap-3">
+              {narratedPricing?.quantities && Object.entries(narratedPricing.quantities).map(([key, value]: [string, any]) => (
+                <Button
+                  key={key}
+                  variant={quantity === key ? "default" : "outline"}
+                  className={`h-20 flex flex-col justify-center ${
+                    quantity === key 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white border-0' 
+                      : 'hover:border-orange-500/50'
+                  }`}
+                  onClick={() => setQuantity(key)}
+                  data-testid={`quantity-option-${key}`}
+                >
+                  <span className="text-lg font-bold">{value.label}</span>
+                  {value.multiplier > 1 && (
+                    <span className="text-xs opacity-90">Descuento x{value.multiplier}</span>
+                  )}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Speed Card */}
+        <Card className="overflow-hidden bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Gauge className="w-5 h-5 text-orange-500" />
+              <h4 className="text-lg font-semibold">Velocidad de Entrega</h4>
+            </div>
+            <div className="space-y-3">
+              {narratedPricing?.speeds && Object.entries(narratedPricing.speeds).map(([key, value]: [string, any]) => (
+                <Button
+                  key={key}
+                  variant={speed === key ? "default" : "outline"}
+                  className={`w-full h-16 justify-between px-4 ${
+                    speed === key 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white border-0' 
+                      : 'hover:border-orange-500/50'
+                  }`}
+                  onClick={() => setSpeed(key)}
+                  data-testid={`speed-option-${key}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Zap className={`w-5 h-5 ${
+                      key === 'express' ? 'text-yellow-400' :
+                      key === 'fast' ? 'text-orange-400' :
+                      'text-current'
+                    }`} />
+                    <span className="font-medium">{value.label.split(' - ')[0]}</span>
                   </div>
-                  <span className="text-sm leading-relaxed">{feature}</span>
-                </div>
+                  {value.multiplier > 1 && (
+                    <span className="text-sm bg-white/20 px-2 py-1 rounded">
+                      +{Math.round((value.multiplier - 1) * 100)}%
+                    </span>
+                  )}
+                </Button>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Price Summary */}
-      <div className="lg:sticky lg:top-8 space-y-6">
-        <Card className="overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-orange-900/10 via-card to-red-900/10 backdrop-blur-sm">
+      {/* Bottom Section with Features and Price */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Features Card */}
+        <Card className="overflow-hidden bg-gradient-to-br from-orange-900/10 to-red-900/10 border-orange-500/20 backdrop-blur-sm">
+          <CardContent className="p-8">
+            <div className="text-center mb-6">
+              <h4 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                ¿Qué incluyen los Videos Narrados?
+              </h4>
+            </div>
+            <div className="grid gap-4">
+              {[
+                { icon: CheckCircle, text: "HD Horizontal (1920x1080)", color: "from-green-500 to-emerald-500" },
+                { icon: Sparkles, text: "1 Edición profesional incluida", color: "from-yellow-500 to-orange-500" },
+                { icon: Video, text: "Prompt personalizado", color: "from-blue-500 to-cyan-500" },
+                { icon: Zap, text: "Calidad de imagen profesional", color: "from-orange-500 to-red-500" },
+                { icon: Music, text: "Estilo de imágenes 2.5D", color: "from-purple-500 to-pink-500" },
+                { icon: Package, text: "Variedad de temas disponibles", color: "from-indigo-500 to-purple-500" }
+              ].map((feature, index) => (
+                <div key={index} className="flex items-start gap-3 group">
+                  <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-r ${feature.color} group-hover:scale-110 transition-transform`}>
+                    <feature.icon className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="text-sm leading-relaxed pt-2">{feature.text}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Price Summary Card */}
+        <Card className="overflow-hidden border-2 border-orange-500/30 bg-gradient-to-br from-orange-900/20 via-card to-red-900/20 backdrop-blur-sm">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/5"></div>
           <CardContent className="relative p-8">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                Tu Cotización Personalizada
+                Cotización Final
               </h3>
               <p className="text-sm text-muted-foreground">Videos Narrados Profesionales</p>
             </div>
 
             {/* Price Breakdown */}
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between items-center pb-4 border-b border-border/50">
-                <span className="text-muted-foreground">Precio base</span>
-                <span className="font-semibold">${calculatedPrice?.basePriceMXN?.toLocaleString() || '0'} MXN</span>
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Duración
+                </span>
+                <span className="font-semibold">{narratedPricing?.durations?.[duration]?.label}</span>
               </div>
-              {calculatedPrice?.speedMultiplier > 1 && (
-                <div className="flex justify-between items-center pb-4 border-b border-border/50">
-                  <span className="text-muted-foreground">Entrega rápida</span>
-                  <span className="font-semibold text-orange-500">+{Math.round((calculatedPrice.speedMultiplier - 1) * 100)}%</span>
-                </div>
-              )}
-              {calculatedPrice?.quantityMultiplier > 1 && (
-                <div className="flex justify-between items-center pb-4 border-b border-border/50">
-                  <span className="text-muted-foreground">Descuento por volumen</span>
-                  <span className="font-semibold text-green-500">x{calculatedPrice.quantityMultiplier}</span>
-                </div>
-              )}
+              <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Cantidad
+                </span>
+                <span className="font-semibold">{narratedPricing?.quantities?.[quantity]?.label}</span>
+              </div>
+              <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Zap className="w-4 h-4" />
+                  Entrega
+                </span>
+                <span className="font-semibold">{narratedPricing?.speeds?.[speed]?.label?.split(' - ')[0]}</span>
+              </div>
             </div>
 
             {/* Total Price */}
-            <div className="text-center mb-6">
-              <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent" data-testid="text-total-price">
-                ${calculatedPrice?.totalMXN?.toLocaleString() || '0'} MXN
+            <div className="text-center mb-6 p-6 rounded-xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20">
+              <p className="text-sm text-muted-foreground mb-2">Total a Pagar</p>
+              <div className="text-5xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent" data-testid="text-total-price">
+                ${calculatedPrice?.totalMXN?.toLocaleString() || '0'}
               </div>
               <div className="text-sm text-muted-foreground mt-2" data-testid="text-total-price-usd">
-                (≈ ${calculatedPrice?.totalUSD || 0} USD)
+                MXN (≈ ${calculatedPrice?.totalUSD || 0} USD)
               </div>
             </div>
 
             <Button 
               onClick={() => handleWhatsAppQuote()}
-              className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="w-full h-14 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 text-lg"
               data-testid="button-whatsapp-quote"
             >
-              <Phone className="mr-2" size={18} />
+              <Phone className="mr-2" size={20} />
               Solicitar Cotización por WhatsApp
             </Button>
           </CardContent>
