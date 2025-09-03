@@ -302,9 +302,6 @@ export default function ClientPortal({ username }: { username: string }) {
                                   <FileVideo className="w-5 h-5 text-primary" />
                                   <div>
                                     <p className="font-medium">{link.title}</p>
-                                    {link.size && (
-                                      <p className="text-sm text-muted-foreground">{link.size}</p>
-                                    )}
                                   </div>
                                 </div>
                                 <Button 

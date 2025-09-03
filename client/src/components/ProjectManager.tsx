@@ -21,7 +21,6 @@ interface DownloadLink {
   id?: string;
   title: string;
   url: string;
-  size?: string;
 }
 
 export default function ProjectManager({ clientId, clientName }: ProjectManagerProps) {
@@ -443,34 +442,26 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                 {/* Add new link form */}
                 <div className="space-y-3 p-4 border border-border rounded-lg">
                   <h4 className="font-semibold">Agregar Nuevo Enlace</h4>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="link-title">Título</Label>
-                      <Input
-                        id="link-title"
-                        placeholder="Video Final HD"
-                        value={newLink.title}
-                        onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="link-size">Tamaño (opcional)</Label>
-                      <Input
-                        id="link-size"
-                        placeholder="250 MB"
-                        value={newLink.size || ''}
-                        onChange={(e) => setNewLink({ ...newLink, size: e.target.value })}
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="link-title">Nombre del Archivo</Label>
+                    <Input
+                      id="link-title"
+                      placeholder="Video Final HD"
+                      value={newLink.title}
+                      onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
+                    />
                   </div>
                   <div>
-                    <Label htmlFor="link-url">URL de Descarga</Label>
+                    <Label htmlFor="link-url">Enlace de Descarga</Label>
                     <Input
                       id="link-url"
-                      placeholder="https://drive.google.com/file/..."
+                      placeholder="Ejemplo: drive.google.com/file/... o wetransfer.com/..."
                       value={newLink.url}
                       onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Puede ser cualquier enlace: Google Drive, WeTransfer, Dropbox, etc.
+                    </p>
                   </div>
                   <Button onClick={handleAddLink} className="fire-gradient text-white w-full">
                     <Plus className="mr-2" size={16} />
@@ -490,9 +481,6 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                             <div className="flex-1">
                               <p className="font-medium">{link.title}</p>
                               <p className="text-xs text-muted-foreground break-all">{link.url}</p>
-                              {link.size && (
-                                <p className="text-sm text-muted-foreground">{link.size}</p>
-                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
