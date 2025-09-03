@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Phone, Video, Music } from 'lucide-react';
+import { Phone, Video, Music, CheckCircle } from 'lucide-react';
 
 export default function PriceCalculator() {
   const { config } = useConfig();
@@ -18,18 +18,11 @@ export default function PriceCalculator() {
   const [duration, setDuration] = React.useState('5-10');
   const [quantity, setQuantity] = React.useState('15');
   const [speed, setSpeed] = React.useState('normal');
-  const [videoOptions, setVideoOptions] = React.useState({
-    quality: 'hd-horizontal',
-    style: '2d',
-    storyTheme: 'guerra',
-    editingLevel: 'basica',
-    customPrompt: 'no-incluido'
-  });
   
   const [calculatedPrice, setCalculatedPrice] = React.useState<any>(null);
 
   const calculatePriceMutation = useMutation({
-    mutationFn: async (data: { duration: string; speed: string; quantity: string; videoOptions: any }) => {
+    mutationFn: async (data: { duration: string; speed: string; quantity: string }) => {
       const response = await apiRequest('POST', '/api/calculate-price', data);
       return response.json();
     },
@@ -40,12 +33,12 @@ export default function PriceCalculator() {
 
   React.useEffect(() => {
     if (activeTab === 'narrated') {
-      calculatePriceMutation.mutate({ duration, speed, quantity, videoOptions });
+      calculatePriceMutation.mutate({ duration, speed, quantity });
     }
-  }, [duration, speed, quantity, videoOptions, activeTab]);
+  }, [duration, speed, quantity, activeTab]);
 
   const pricing = config?.pricing as any;
-  const narratedPricing = pricing?.narratedVideos || pricing; // Fallback for old structure
+  const narratedPricing = pricing?.narratedVideos || pricing;
   const singingPackages = pricing?.singingPackages || {};
 
   const handleWhatsAppQuote = () => {
@@ -59,13 +52,6 @@ export default function PriceCalculator() {
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${config.whatsappNumber.replace(/\s+/g, '')}&text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
-  };
-
-  const handleVideoOptionChange = (optionType: string, value: string) => {
-    setVideoOptions(prev => ({
-      ...prev,
-      [optionType]: value
-    }));
   };
 
   const renderNarratedVideos = () => (
@@ -132,32 +118,20 @@ export default function PriceCalculator() {
           </div>
         </div>
 
-        {/* Video Configuration Options */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold fire-text">Configuración del Video</h3>
-          
-          {narratedPricing?.videoOptions && Object.entries(narratedPricing.videoOptions).map(([optionKey, option]: [string, any]) => (
-            <div key={optionKey}>
-              <Label className="block text-sm font-medium mb-2 fire-text">{option.name}</Label>
-              <Select 
-                value={videoOptions[optionKey as keyof typeof videoOptions]} 
-                onValueChange={(value) => handleVideoOptionChange(optionKey, value)}
-              >
-                <SelectTrigger className="bg-input border-border focus:border-primary">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(option.options).map(([optKey, opt]: [string, any]) => (
-                    <SelectItem key={optKey} value={optKey}>
-                      {opt.label} {opt.priceModifier > 1.0 ? `(+${Math.round((opt.priceModifier - 1) * 100)}%)` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground mt-1">{option.description}</p>
-            </div>
-          ))}
-        </div>
+        {/* Video Features List */}
+        <Card className="glass-card fire-border p-6">
+          <h3 className="text-lg font-semibold fire-text mb-4">¿Qué incluyen los Videos Narrados?</h3>
+          <div className="space-y-3">
+            {narratedPricing?.videoFeatures && narratedPricing.videoFeatures.map((feature: string, index: number) => (
+              <div key={index} className="flex items-center space-x-3">
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
+                <span className="text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       <div className="space-y-6">
@@ -175,20 +149,6 @@ export default function PriceCalculator() {
                 (${calculatedPrice?.totalUSD || 0} USD)
               </span>
             </div>
-            
-            {calculatedPrice?.selectedOptions && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <h4 className="text-sm font-semibold mb-2">Opciones seleccionadas:</h4>
-                <div className="space-y-1 text-xs">
-                  {Object.entries(calculatedPrice.selectedOptions).map(([key, option]: [string, any]) => (
-                    <div key={key} className="flex justify-between">
-                      <span>{option.label}</span>
-                      <span>{option.modifier > 1.0 ? `+${Math.round((option.modifier - 1) * 100)}%` : ''}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
           <Button 
             onClick={handleWhatsAppQuote}
@@ -243,31 +203,43 @@ export default function PriceCalculator() {
         <Card className="glass-card fire-border p-6">
           <h4 className="text-lg font-semibold fire-text mb-4">¿Qué incluyen los Videos Cantados?</h4>
           <div className="grid md:grid-cols-2 gap-6 text-left">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
                 <span className="text-sm">Letra personalizada según tu tema</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
                 <span className="text-sm">Música de fondo profesional</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
                 <span className="text-sm">Voces profesionales</span>
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
                 <span className="text-sm">Animaciones sincronizadas</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
                 <span className="text-sm">Formato HD optimizado</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                <div className="fire-gradient w-6 h-6 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="text-white" size={14} />
+                </div>
                 <span className="text-sm">Entrega en 5-7 días</span>
               </div>
             </div>

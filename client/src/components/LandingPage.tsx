@@ -110,25 +110,6 @@ export default function LandingPage() {
             <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto">
               {config?.siteContent?.heroDescription || 'Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={() => scrollToSection('calculator')} 
-                className="fire-gradient text-white px-8 py-4 text-lg font-semibold hover:opacity-90 fire-shadow animate-glow-pulse"
-                data-testid="button-calculate-price"
-              >
-                <span className="mr-2">🧮</span>
-                Calcular Precio
-              </Button>
-              <Button 
-                onClick={handleWhatsAppContact}
-                variant="outline"
-                className="border-2 border-primary text-primary px-8 py-4 text-lg font-semibold hover:bg-primary hover:text-white transition-all"
-                data-testid="button-whatsapp-contact"
-              >
-                <Phone className="mr-2" size={20} />
-                Contactar
-              </Button>
-            </div>
           </div>
         </div>
       </section>
