@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useConfig } from '@/contexts/ConfigContext';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Phone, Video, Music, CheckCircle, Clock, Package, Sparkles, X } from 'lucide-react';
+import { Phone, Video, Music, CheckCircle, Clock, Package, Sparkles, X, Timer, Zap, Gauge } from 'lucide-react';
 
 export default function PriceCalculator() {
   const { config } = useConfig();
@@ -202,88 +202,178 @@ export default function PriceCalculator() {
 
   const renderNarratedVideos = () => (
     <div className="space-y-8">
-      {/* Selector de Duración más compacto */}
+      {/* Header elegante */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 mb-4">
+          <Video className="w-4 h-4 text-orange-500" />
+          <span className="text-sm font-medium text-orange-500">Producción Profesional</span>
+        </div>
+        <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
+          Videos Narrados Premium
+        </h3>
+        <p className="text-muted-foreground">
+          Contenido audiovisual narrado profesionalmente
+        </p>
+      </div>
+
+      {/* Selector de Duración con diseño de cards transparentes */}
       <div>
-        <Label className="text-sm font-medium mb-3 block">Duración del Video</Label>
+        <Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+          <Clock className="w-4 h-4 text-orange-500" />
+          Duración del Video
+        </Label>
         <div className="grid md:grid-cols-3 gap-3">
-          {narratedPricing?.durations && Object.entries(narratedPricing.durations).map(([key, value]: [string, any]) => (
-            <button
+          {narratedPricing?.durations && Object.entries(narratedPricing.durations).map(([key, value]: [string, any], index: number) => (
+            <div
               key={key}
-              onClick={() => setDuration(key)}
-              className={`p-4 rounded-lg border-2 transition-all ${
-                duration === key 
-                  ? 'border-primary bg-primary/10' 
-                  : 'border-border hover:border-primary/50'
+              className={`group relative transform transition-all duration-300 hover:scale-105 ${
+                duration === key ? 'scale-105' : ''
               }`}
-              data-testid={`duration-option-${key}`}
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <div className="text-sm font-medium">{value.label}</div>
-              <div className="text-lg font-bold text-primary mt-1">
-                ${value.mxn?.toLocaleString()} MXN
-              </div>
-            </button>
+              {key === '10-20' && (
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+                  <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-semibold">
+                    POPULAR
+                  </span>
+                </div>
+              )}
+              
+              <Card
+                onClick={() => setDuration(key)}
+                className={`cursor-pointer overflow-hidden transition-all duration-300 ${
+                  duration === key 
+                    ? 'border-2 border-orange-500 bg-gradient-to-br from-orange-900/20 to-red-900/20' 
+                    : 'border-border/50 hover:border-orange-500/50 bg-card/50 backdrop-blur-sm'
+                }`}
+                data-testid={`duration-option-${key}`}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${
+                      key === '5-10' ? 'from-green-500 to-emerald-600' :
+                      key === '10-20' ? 'from-orange-500 to-red-600' :
+                      'from-purple-500 to-pink-600'
+                    } p-0.5`}>
+                      <div className="w-full h-full rounded-md bg-background flex items-center justify-center">
+                        <Timer className="w-5 h-5 text-primary" />
+                      </div>
+                    </div>
+                    {duration === key && (
+                      <CheckCircle className="w-5 h-5 text-orange-500" />
+                    )}
+                  </div>
+                  <div className="text-sm font-medium mb-1">{value.label}</div>
+                  <div className="text-xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                    ${value.mxn?.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">MXN base</div>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Cantidad y Velocidad en una fila */}
+      {/* Cantidad y Velocidad con diseño elegante */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Cantidad */}
-        <div>
-          <Label className="text-sm font-medium mb-3 block">Cantidad de Videos</Label>
-          <Select value={quantity} onValueChange={setQuantity}>
-            <SelectTrigger className="h-12" data-testid="select-quantity">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
+        {/* Cantidad con diseño de card */}
+        <Card className="overflow-hidden bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <Label className="text-sm font-medium mb-3 flex items-center gap-2">
+              <Package className="w-4 h-4 text-orange-500" />
+              Cantidad de Videos
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
               {narratedPricing?.quantities && Object.entries(narratedPricing.quantities).map(([key, value]: [string, any]) => (
-                <SelectItem key={key} value={key}>
-                  {value.label}
-                </SelectItem>
+                <Button
+                  key={key}
+                  variant={quantity === key ? "default" : "outline"}
+                  className={`h-14 flex flex-col justify-center ${
+                    quantity === key 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white border-0' 
+                      : 'border-border/50 hover:border-orange-500/50 bg-card/30'
+                  }`}
+                  onClick={() => setQuantity(key)}
+                  data-testid={`quantity-option-${key}`}
+                >
+                  <span className="font-bold">{value.label}</span>
+                  <span className="text-xs opacity-80">{getDeliveryDays(key, speed)}</span>
+                </Button>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Velocidad */}
-        <div>
-          <Label className="text-sm font-medium mb-3 block">Velocidad de Entrega</Label>
-          <Select value={speed} onValueChange={setSpeed}>
-            <SelectTrigger className="h-12" data-testid="select-speed">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="normal">Normal ({getDeliveryDays(quantity, 'normal')})</SelectItem>
-              <SelectItem value="fast">Rápido ({getDeliveryDays(quantity, 'fast')})</SelectItem>
-              <SelectItem value="express">Express ({getDeliveryDays(quantity, 'express')})</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Velocidad con diseño de card */}
+        <Card className="overflow-hidden bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <Label className="text-sm font-medium mb-3 flex items-center gap-2">
+              <Gauge className="w-4 h-4 text-orange-500" />
+              Velocidad de Entrega
+            </Label>
+            <div className="space-y-2">
+              {[
+                { key: 'normal', label: 'Normal', icon: Clock, color: 'text-blue-500' },
+                { key: 'fast', label: 'Rápido', icon: Zap, color: 'text-orange-500' },
+                { key: 'express', label: 'Express', icon: Zap, color: 'text-red-500' }
+              ].map((item) => (
+                <Button
+                  key={item.key}
+                  variant={speed === item.key ? "default" : "outline"}
+                  className={`w-full h-12 justify-between ${
+                    speed === item.key 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white border-0' 
+                      : 'border-border/50 hover:border-orange-500/50 bg-card/30'
+                  }`}
+                  onClick={() => setSpeed(item.key)}
+                  data-testid={`speed-option-${item.key}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <item.icon className={`w-4 h-4 ${speed === item.key ? 'text-white' : item.color}`} />
+                    <span className="font-medium">{item.label}</span>
+                  </div>
+                  <span className="text-xs">{getDeliveryDays(quantity, item.key)}</span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Grid inferior con características y precio */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Características */}
-        <Card className="border-primary/20">
+        {/* Características con diseño transparente */}
+        <Card className="overflow-hidden bg-gradient-to-br from-orange-900/10 to-red-900/10 border-orange-500/20 backdrop-blur-sm">
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Sparkles className="w-5 h-5 text-orange-500" />
               Incluye en Videos Narrados
             </h3>
-            <div className="space-y-3 text-sm">
+            <div className="grid gap-3 text-sm">
               {narratedPricing?.videoFeatures?.map((feature: string, index: number) => (
-                <div key={index} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span>{feature}</span>
+                <div key={index} className="flex items-start gap-3 group">
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-r ${
+                    index === 0 ? 'from-green-500 to-emerald-500' :
+                    index === 1 ? 'from-yellow-500 to-orange-500' :
+                    index === 2 ? 'from-blue-500 to-cyan-500' :
+                    index === 3 ? 'from-purple-500 to-pink-500' :
+                    index === 4 ? 'from-red-500 to-pink-500' :
+                    'from-indigo-500 to-purple-500'
+                  } group-hover:scale-110 transition-transform`}>
+                    <CheckCircle className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="pt-1">{feature}</span>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Precio Total */}
-        <Card className="border-2 border-primary/30 bg-gradient-to-br from-orange-900/10 to-red-900/10">
-          <CardContent className="p-6">
+        {/* Precio Total con diseño premium */}
+        <Card className="overflow-hidden border-2 border-orange-500/30 bg-gradient-to-br from-orange-900/20 via-card to-red-900/20 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/5"></div>
+          <CardContent className="relative p-6">
             <div className="text-center mb-4">
               <p className="text-sm text-muted-foreground mb-2">Total a Pagar</p>
               <div className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent" data-testid="text-total-price">
@@ -292,19 +382,21 @@ export default function PriceCalculator() {
               <p className="text-sm text-muted-foreground mt-1">
                 MXN (≈ ${calculatedPrice?.totalUSD || 0} USD)
               </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Entrega estimada: {getDeliveryDays(quantity, speed)}
-              </p>
+              <div className="mt-3 p-2 rounded-lg bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20">
+                <p className="text-xs text-orange-400 flex items-center justify-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Entrega: {getDeliveryDays(quantity, speed)}
+                </p>
+              </div>
             </div>
 
             <Button 
-              onClick={() => {
-                setShowQuoteModal(true);
-              }}
-              className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold transition-all"
+              onClick={() => setShowQuoteModal(true)}
+              className="w-full h-12 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
               data-testid="button-quote-narrated"
             >
-              Cotizar
+              <Sparkles className="mr-2" size={18} />
+              Ver Cotización Completa
             </Button>
           </CardContent>
         </Card>
@@ -317,8 +409,12 @@ export default function PriceCalculator() {
 
   const renderSingingVideos = () => (
     <div>
-      {/* Header */}
+      {/* Header elegante */}
       <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-purple-500/20 mb-4">
+          <Music className="w-4 h-4 text-purple-500" />
+          <span className="text-sm font-medium text-purple-500">Paquetes Especiales</span>
+        </div>
         <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
           Videos Cantados Premium
         </h3>
@@ -327,86 +423,101 @@ export default function PriceCalculator() {
         </p>
       </div>
 
-      {/* Paquetes */}
+      {/* Paquetes con diseño transparente */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {Object.entries(singingPackages).map(([key, pkg]: [string, any]) => (
-          <Card 
+        {Object.entries(singingPackages).map(([key, pkg]: [string, any], index: number) => (
+          <div
             key={key}
-            className={`cursor-pointer transition-all hover:scale-105 ${
-              selectedPackage === key 
-                ? 'border-2 border-purple-500 bg-purple-900/10' 
-                : 'border-border hover:border-purple-500/50'
+            className={`group relative transform transition-all duration-500 hover:scale-105 ${
+              selectedPackage === key ? 'scale-105' : ''
             }`}
-            onClick={() => setSelectedPackage(key)}
-            data-testid={`package-${key}`}
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <CardContent className="p-4 text-center">
-              {key === 'standard' && (
-                <div className="mb-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-purple-500 text-white">
-                    POPULAR
-                  </span>
-                </div>
-              )}
-              <h4 className="font-bold mb-2">{pkg.label}</h4>
-              <div className="text-2xl font-bold mb-1">${pkg.mxn?.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground mb-3">MXN</div>
-              <div className="text-sm mb-3">
-                <div className="flex items-center justify-center gap-1">
-                  <Video className="w-4 h-4 text-purple-500" />
-                  <span>{pkg.videos} videos</span>
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Entrega: {getDeliveryDays(pkg.videos?.toString() || '15', 'normal')}
-                </div>
+            {key === 'standard' && (
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
+                <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-semibold">
+                  POPULAR
+                </span>
               </div>
-              <Button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowQuoteModal(true);
-                }}
-                className={`w-full text-sm ${
-                  selectedPackage === key
-                    ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                    : 'bg-primary/10 hover:bg-primary/20'
-                }`}
-              >
-                Cotizar
-              </Button>
-            </CardContent>
-          </Card>
+            )}
+
+            <Card 
+              className={`h-full cursor-pointer overflow-hidden transition-all duration-300 ${
+                selectedPackage === key 
+                  ? 'border-2 border-purple-500 bg-gradient-to-br from-purple-900/20 to-pink-900/20' 
+                  : 'border-border/50 hover:border-purple-500/50 bg-card/50 backdrop-blur-sm'
+              }`}
+              onClick={() => setSelectedPackage(key)}
+              data-testid={`package-${key}`}
+            >
+              <CardContent className="p-4 text-center">
+                {/* Icon */}
+                <div className={`mx-auto mb-3 h-12 w-12 rounded-xl bg-gradient-to-r ${
+                  key === 'basic' ? 'from-gray-500 to-gray-600' :
+                  key === 'standard' ? 'from-purple-500 to-pink-500' :
+                  key === 'premium' ? 'from-yellow-500 to-orange-500' :
+                  'from-cyan-500 to-blue-500'
+                } p-0.5`}>
+                  <div className="flex h-full w-full items-center justify-center rounded-lg bg-background">
+                    <Music className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+
+                <h4 className="font-bold mb-2">{pkg.label}</h4>
+                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-1">
+                  ${pkg.mxn?.toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground mb-3">MXN</div>
+                
+                <div className="space-y-1 text-xs mb-3">
+                  <div className="flex items-center justify-center gap-1">
+                    <Video className="w-3 h-3 text-purple-500" />
+                    <span>{pkg.videos} videos</span>
+                  </div>
+                  <div className="text-muted-foreground">
+                    {getDeliveryDays(pkg.videos?.toString() || '15', 'normal')}
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowQuoteModal(true);
+                  }}
+                  className={`w-full text-sm ${
+                    selectedPackage === key
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+                      : 'bg-purple-500/10 hover:bg-purple-500/20'
+                  }`}
+                >
+                  Cotizar
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
 
-      {/* Características */}
-      <Card className="border-purple-500/20">
+      {/* Características con diseño transparente */}
+      <Card className="overflow-hidden bg-gradient-to-br from-purple-900/10 to-pink-900/10 border-purple-500/20 backdrop-blur-sm">
         <CardContent className="p-6">
           <h4 className="font-semibold mb-4 text-center">Incluye en Videos Cantados</h4>
-          <div className="grid md:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Letra personalizada</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Música profesional</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Voces de estudio</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Animaciones sincronizadas</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Formato HD</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Revisiones incluidas</span>
-            </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+            {[
+              { icon: Music, text: "Letra personalizada", color: "from-purple-500 to-pink-500" },
+              { icon: Sparkles, text: "Música profesional", color: "from-yellow-500 to-orange-500" },
+              { icon: Video, text: "Animaciones sincronizadas", color: "from-blue-500 to-cyan-500" },
+              { icon: CheckCircle, text: "Formato HD", color: "from-green-500 to-emerald-500" },
+              { icon: Clock, text: "Entrega garantizada", color: "from-red-500 to-pink-500" },
+              { icon: Zap, text: "Revisiones incluidas", color: "from-orange-500 to-yellow-500" }
+            ].map((feature, index) => (
+              <div key={index} className="flex items-start gap-3 group">
+                <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-r ${feature.color} group-hover:scale-110 transition-transform`}>
+                  <feature.icon className="h-4 w-4 text-white" />
+                </div>
+                <span className="pt-1">{feature.text}</span>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -419,28 +530,28 @@ export default function PriceCalculator() {
   return (
     <div className="w-full">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-12">
+        <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-card/50 backdrop-blur-sm">
           <TabsTrigger 
             value="narrated" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white transition-all"
           >
             <Video className="mr-2" size={16} />
             Videos Narrados
           </TabsTrigger>
           <TabsTrigger 
             value="singing" 
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white transition-all"
           >
             <Music className="mr-2" size={16} />
             Videos Cantados
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="narrated" className="mt-6">
+        <TabsContent value="narrated" className="mt-6 animate-fade-in">
           {renderNarratedVideos()}
         </TabsContent>
         
-        <TabsContent value="singing" className="mt-6">
+        <TabsContent value="singing" className="mt-6 animate-fade-in">
           {renderSingingVideos()}
         </TabsContent>
       </Tabs>
