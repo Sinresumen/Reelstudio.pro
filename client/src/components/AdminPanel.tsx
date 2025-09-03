@@ -19,6 +19,8 @@ export default function AdminPanel() {
   const [, setLocation] = useLocation();
   const { config, refetchConfig } = useConfig();
   const [showAddClient, setShowAddClient] = React.useState(false);
+  const [showEditClient, setShowEditClient] = React.useState(false);
+  const [editingClient, setEditingClient] = React.useState<any>(null);
   
   const { data: clients = [] } = useQuery({
     queryKey: ['/api/clients'],
@@ -51,6 +53,18 @@ export default function AdminPanel() {
     },
   });
 
+  const updateClientMutation = useMutation({
+    mutationFn: async ({ id, ...updates }: any) => {
+      const response = await apiRequest('PUT', `/api/clients/${id}`, updates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      setShowEditClient(false);
+      setEditingClient(null);
+    },
+  });
+
   const handleCreateClient = (formData: FormData) => {
     const client = {
       name: formData.get('name'),
@@ -59,6 +73,20 @@ export default function AdminPanel() {
       username: formData.get('username'),
     };
     createClientMutation.mutate(client);
+  };
+
+  const handleEditClient = (client: any) => {
+    setEditingClient(client);
+    setShowEditClient(true);
+  };
+
+  const handleUpdateClient = (formData: FormData) => {
+    updateClientMutation.mutate({
+      id: editingClient.id,
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+    });
   };
 
   const handleSiteContentUpdate = () => {
@@ -92,10 +120,18 @@ export default function AdminPanel() {
   const handleWhatsAppConfigSave = () => {
     const whatsappNumber = (document.getElementById('whatsapp-config') as HTMLInputElement)?.value;
     const businessName = (document.getElementById('business-name-config') as HTMLInputElement)?.value;
+    const whatsappApiKey = (document.getElementById('whatsapp-api-key') as HTMLInputElement)?.value;
+    const whatsappPhoneId = (document.getElementById('whatsapp-phone-id') as HTMLInputElement)?.value;
 
     updateConfigMutation.mutate({
+      ...config,
       whatsappNumber,
       businessName,
+      messagingApis: {
+        ...config?.messagingApis,
+        whatsappApiKey,
+        whatsappPhoneId,
+      },
     });
   };
 
@@ -193,7 +229,7 @@ export default function AdminPanel() {
   const renderSettings = () => (
     <div className="space-y-6">
       <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Configuración de WhatsApp</h3>
+        <h3 className="text-xl font-bold mb-4 fire-text">Configuración de WhatsApp Business API</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="whatsapp-config">Número de WhatsApp</Label>
@@ -217,6 +253,28 @@ export default function AdminPanel() {
               data-testid="input-business-name"
             />
           </div>
+          <div>
+            <Label htmlFor="whatsapp-api-key">WhatsApp API Token</Label>
+            <Input
+              id="whatsapp-api-key"
+              type="password"
+              placeholder="EAAxxxxxxxxxxxxxx..."
+              defaultValue={config?.messagingApis?.whatsappApiKey}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-whatsapp-api-key"
+            />
+          </div>
+          <div>
+            <Label htmlFor="whatsapp-phone-id">Phone Number ID</Label>
+            <Input
+              id="whatsapp-phone-id"
+              type="text"
+              placeholder="1234567890123456"
+              defaultValue={config?.messagingApis?.whatsappPhoneId}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-whatsapp-phone-id"
+            />
+          </div>
         </div>
         <Button 
           onClick={handleWhatsAppConfigSave}
@@ -225,6 +283,80 @@ export default function AdminPanel() {
           data-testid="button-update-whatsapp"
         >
           {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar WhatsApp'}
+        </Button>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Configuración de Messenger API</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <Label htmlFor="messenger-page-id">Facebook Page ID</Label>
+            <Input
+              id="messenger-page-id"
+              type="text"
+              placeholder="1234567890"
+              defaultValue={config?.messagingApis?.messengerPageId}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-messenger-page-id"
+            />
+          </div>
+          <div>
+            <Label htmlFor="messenger-app-id">Facebook App ID</Label>
+            <Input
+              id="messenger-app-id"
+              type="text"
+              placeholder="9876543210"
+              defaultValue={config?.messagingApis?.messengerAppId}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-messenger-app-id"
+            />
+          </div>
+          <div>
+            <Label htmlFor="messenger-api-key">Messenger API Token</Label>
+            <Input
+              id="messenger-api-key"
+              type="password"
+              placeholder="EAAxxxxxxxxxxxxxx..."
+              defaultValue={config?.messagingApis?.messengerApiKey}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-messenger-api-key"
+            />
+          </div>
+          <div>
+            <Label htmlFor="messenger-webhook-verify">Webhook Verify Token</Label>
+            <Input
+              id="messenger-webhook-verify"
+              type="text"
+              placeholder="my-verify-token-123"
+              defaultValue={config?.messagingApis?.messengerWebhookVerify}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-messenger-webhook-verify"
+            />
+          </div>
+        </div>
+        <Button 
+          onClick={() => {
+            const messengerPageId = (document.getElementById('messenger-page-id') as HTMLInputElement)?.value;
+            const messengerAppId = (document.getElementById('messenger-app-id') as HTMLInputElement)?.value;
+            const messengerApiKey = (document.getElementById('messenger-api-key') as HTMLInputElement)?.value;
+            const messengerWebhookVerify = (document.getElementById('messenger-webhook-verify') as HTMLInputElement)?.value;
+
+            updateConfigMutation.mutate({
+              ...config,
+              messagingApis: {
+                ...config?.messagingApis,
+                messengerPageId,
+                messengerAppId,
+                messengerApiKey,
+                messengerWebhookVerify,
+              },
+            });
+          }}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-update-messenger"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar Messenger'}
         </Button>
       </Card>
 
@@ -503,6 +635,100 @@ export default function AdminPanel() {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Client Dialog */}
+        <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
+          <DialogContent className="glass-card fire-border max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="fire-text">Editar Cliente</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                handleUpdateClient(formData);
+              }}
+              className="space-y-6"
+              data-testid="form-edit-client"
+            >
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-client-name">Nombre de la Empresa</Label>
+                  <Input
+                    id="edit-client-name"
+                    name="name"
+                    defaultValue={editingClient?.name}
+                    placeholder="ABC Corporation"
+                    className="bg-input border-border focus:border-primary"
+                    required
+                    data-testid="input-edit-client-name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-client-email">Email de Contacto</Label>
+                  <Input
+                    id="edit-client-email"
+                    name="email"
+                    type="email"
+                    defaultValue={editingClient?.email}
+                    placeholder="contacto@abccorp.com"
+                    className="bg-input border-border focus:border-primary"
+                    required
+                    data-testid="input-edit-client-email"
+                  />
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-client-phone">Teléfono</Label>
+                  <Input
+                    id="edit-client-phone"
+                    name="phone"
+                    type="tel"
+                    defaultValue={editingClient?.phone}
+                    placeholder="+52 55 1234 5678"
+                    className="bg-input border-border focus:border-primary"
+                    data-testid="input-edit-client-phone"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-client-username">Username</Label>
+                  <Input
+                    id="edit-client-username"
+                    name="username"
+                    value={editingClient?.username}
+                    className="bg-muted border-border"
+                    readOnly
+                    disabled
+                    data-testid="input-edit-client-username"
+                  />
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowEditClient(false);
+                    setEditingClient(null);
+                  }}
+                  className="flex-1"
+                  data-testid="button-cancel-edit-client"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1 fire-gradient text-white font-semibold hover:opacity-90"
+                  disabled={updateClientMutation.isPending}
+                  data-testid="button-submit-edit-client"
+                >
+                  {updateClientMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="glass-card fire-border p-6">
@@ -554,7 +780,12 @@ export default function AdminPanel() {
                       >
                         <Eye size={16} />
                       </Button>
-                      <Button size="icon" variant="ghost" data-testid={`button-edit-client-${client.id}`}>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={() => handleEditClient(client)}
+                        data-testid={`button-edit-client-${client.id}`}
+                      >
                         <Edit size={16} />
                       </Button>
                       <Button size="icon" variant="ghost" className="text-destructive" data-testid={`button-delete-client-${client.id}`}>

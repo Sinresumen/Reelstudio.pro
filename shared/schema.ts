@@ -20,6 +20,7 @@ export const siteConfig = pgTable("site_config", {
   pricing: jsonb("pricing").notNull(),
   sampleVideos: jsonb("sample_videos").default(sql`'[]'`),
   siteContent: jsonb("site_content").default(sql`'{}'`),
+  messagingConfig: jsonb("messaging_config").default(sql`'{}'`),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -124,4 +125,23 @@ export type SiteContent = {
   calculatorDescription?: string;
   backgroundImageUrl?: string;
   customCSS?: string;
+};
+
+// Messaging configuration type
+export type MessagingConfig = {
+  whatsappApiEnabled?: boolean;
+  whatsappApiToken?: string;
+  whatsappBusinessId?: string;
+  messengerEnabled?: boolean;
+  messengerPageId?: string;
+  messengerAccessToken?: string;
+};
+
+// Download link type
+export type DownloadLink = {
+  id: string;
+  title: string;
+  url: string;
+  type: 'video' | 'document' | 'image';
+  size?: string;
 };
