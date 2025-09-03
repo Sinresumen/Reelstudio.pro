@@ -1,65 +1,64 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { useConfig } from '@/contexts/ConfigContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Eye, Plus, Edit, Trash2, Users, Video, DollarSign, Settings } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { useToast } from '@/hooks/use-toast';
-import { BarChart3, Users, Video, Settings, DollarSign, Edit, ArrowLeft, Plus, Eye, Trash2, Image, Palette, Type } from 'lucide-react';
-import type { Client, InsertClient } from '@shared/schema';
+import { useConfig } from '@/contexts/ConfigContext';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { ClientWithProjects } from '@shared/schema';
 
 export default function AdminPanel() {
-  const [activeSection, setActiveSection] = React.useState('dashboard');
   const [, setLocation] = useLocation();
+  const { config, refetchConfig } = useConfig();
   const [showAddClient, setShowAddClient] = React.useState(false);
-  const { config, updateConfig, refetchConfig } = useConfig();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: clients = [] } = useQuery<Client[]>({
+  
+  const { data: clients = [] } = useQuery({
     queryKey: ['/api/clients'],
+    queryFn: async () => {
+      const response = await fetch('/api/clients');
+      if (!response.ok) throw new Error('Failed to fetch clients');
+      return response.json() as Promise<ClientWithProjects[]>;
+    },
+  });
+
+  const updateConfigMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/config', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchConfig();
+      queryClient.invalidateQueries({ queryKey: ['/api/config'] });
+    },
   });
 
   const createClientMutation = useMutation({
-    mutationFn: async (clientData: InsertClient) => {
-      const response = await apiRequest('POST', '/api/clients', clientData);
+    mutationFn: async (client: any) => {
+      const response = await apiRequest('POST', '/api/clients', client);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
       setShowAddClient(false);
-      toast({ title: 'Cliente creado exitosamente' });
-    },
-  });
-
-  const updateConfigMutation = useMutation({
-    mutationFn: async (updates: any) => {
-      await updateConfig(updates);
-    },
-    onSuccess: () => {
-      toast({ title: 'Configuración actualizada exitosamente' });
-      refetchConfig();
     },
   });
 
   const handleCreateClient = (formData: FormData) => {
-    const clientData: InsertClient = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      username: formData.get('username') as string,
-      projects: [],
+    const client = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      username: formData.get('username'),
     };
-
-    createClientMutation.mutate(clientData);
+    createClientMutation.mutate(client);
   };
 
   const handleSiteContentUpdate = () => {
@@ -74,6 +73,7 @@ export default function AdminPanel() {
     const customCSS = (document.getElementById('custom-css') as HTMLTextAreaElement)?.value;
 
     updateConfigMutation.mutate({
+      ...config,
       siteContent: {
         ...config?.siteContent,
         heroTitle,
@@ -102,15 +102,36 @@ export default function AdminPanel() {
   const handlePricingUpdate = (key: string, field: string, value: number) => {
     if (!config?.pricing) return;
 
-    const updatedPricing = { ...config.pricing };
+    const updatedPricing = { ...config.pricing } as any;
     const [section, item] = key.split('-');
     
-    if (section === 'duration') {
-      const durationKey = key.replace('duration-', '').replace('-mxn', '').replace('-usd', '');
-      if (!updatedPricing.durations[durationKey]) {
-        updatedPricing.durations[durationKey] = { mxn: 0, usd: 0, label: '' };
+    if (section === 'narratedDuration' && item) {
+      if (!updatedPricing.narratedVideos) updatedPricing.narratedVideos = {};
+      if (!updatedPricing.narratedVideos.durations) updatedPricing.narratedVideos.durations = {};
+      if (!updatedPricing.narratedVideos.durations[item]) {
+        updatedPricing.narratedVideos.durations[item] = { mxn: 0, usd: 0, label: '' };
       }
-      updatedPricing.durations[durationKey][field as 'mxn' | 'usd'] = value;
+      updatedPricing.narratedVideos.durations[item][field as 'mxn' | 'usd'] = value;
+    } else if (section === 'singingPackage' && item) {
+      if (!updatedPricing.singingPackages) updatedPricing.singingPackages = {};
+      if (!updatedPricing.singingPackages[item]) {
+        updatedPricing.singingPackages[item] = { mxn: 0, usd: 0, videos: 0, label: '' };
+      }
+      updatedPricing.singingPackages[item][field as 'mxn' | 'usd' | 'videos'] = value;
+    } else if (section === 'speed' && item) {
+      if (!updatedPricing.narratedVideos) updatedPricing.narratedVideos = {};
+      if (!updatedPricing.narratedVideos.speeds) updatedPricing.narratedVideos.speeds = {};
+      if (!updatedPricing.narratedVideos.speeds[item]) {
+        updatedPricing.narratedVideos.speeds[item] = { multiplier: 1, label: '' };
+      }
+      updatedPricing.narratedVideos.speeds[item]['multiplier'] = value;
+    } else if (section === 'quantity' && item) {
+      if (!updatedPricing.narratedVideos) updatedPricing.narratedVideos = {};
+      if (!updatedPricing.narratedVideos.quantities) updatedPricing.narratedVideos.quantities = {};
+      if (!updatedPricing.narratedVideos.quantities[item]) {
+        updatedPricing.narratedVideos.quantities[item] = { multiplier: 1, label: '' };
+      }
+      updatedPricing.narratedVideos.quantities[item]['multiplier'] = value;
     }
 
     updateConfigMutation.mutate({ pricing: updatedPricing });
@@ -144,7 +165,7 @@ export default function AdminPanel() {
             <div>
               <p className="text-sm text-muted-foreground">Proyectos Activos</p>
               <p className="text-2xl font-bold fire-text" data-testid="stat-active-projects">
-                {clients.reduce((acc, client) => acc + (client.projects?.length || 0), 0)}
+                {clients.reduce((acc, client) => acc + (client.projects?.filter(p => p.status === 'in-progress').length || 0), 0)}
               </p>
             </div>
             <div className="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
@@ -155,78 +176,43 @@ export default function AdminPanel() {
         <Card className="glass-card fire-border p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Configuración</p>
-              <p className="text-2xl font-bold fire-text" data-testid="stat-config-status">Activa</p>
+              <p className="text-sm text-muted-foreground">Videos Completados</p>
+              <p className="text-2xl font-bold fire-text" data-testid="stat-completed-videos">
+                {clients.reduce((acc, client) => acc + (client.projects?.filter(p => p.status === 'delivered').length || 0), 0)}
+              </p>
             </div>
             <div className="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
-              <BarChart3 className="text-white" size={24} />
+              <DollarSign className="text-white" size={24} />
             </div>
           </div>
         </Card>
       </div>
-
-      <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Acceso Rápido</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Button 
-            onClick={() => setActiveSection('design')}
-            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
-          >
-            <Palette size={24} className="mb-2" />
-            Diseño y Logo
-          </Button>
-          <Button 
-            onClick={() => setActiveSection('content')}
-            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
-          >
-            <Type size={24} className="mb-2" />
-            Textos y Contenido
-          </Button>
-          <Button 
-            onClick={() => setActiveSection('pricing')}
-            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
-          >
-            <DollarSign size={24} className="mb-2" />
-            Precios
-          </Button>
-          <Button 
-            onClick={() => setActiveSection('clients')}
-            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
-          >
-            <Users size={24} className="mb-2" />
-            Clientes
-          </Button>
-        </div>
-      </Card>
     </div>
   );
 
-  const renderDesign = () => (
+  const renderSettings = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold fire-text">Diseño y Apariencia</h2>
-
       <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Logo y Marca</h3>
-        <div className="grid md:grid-cols-2 gap-4">
+        <h3 className="text-xl font-bold mb-4 fire-text">Configuración de WhatsApp</h3>
+        <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <Label htmlFor="logo-url">URL del Logo</Label>
+            <Label htmlFor="whatsapp-config">Número de WhatsApp</Label>
             <Input
-              id="logo-url"
-              type="url"
-              defaultValue={config?.siteContent?.logoUrl}
-              placeholder="https://ejemplo.com/logo.png"
+              id="whatsapp-config"
+              type="tel"
+              placeholder="+52 55 1234 5678"
+              defaultValue={config?.whatsappNumber}
               className="bg-input border-border focus:border-primary"
-              data-testid="input-logo-url"
+              data-testid="input-whatsapp-number"
             />
-            <p className="text-xs text-muted-foreground mt-1">Si no se proporciona, se usará el ícono predeterminado</p>
           </div>
           <div>
             <Label htmlFor="business-name-config">Nombre del Negocio</Label>
             <Input
               id="business-name-config"
               type="text"
+              placeholder="VideoVenta System"
               defaultValue={config?.businessName}
-              placeholder="VideoVenta"
               className="bg-input border-border focus:border-primary"
               data-testid="input-business-name"
             />
@@ -236,139 +222,119 @@ export default function AdminPanel() {
           onClick={handleWhatsAppConfigSave}
           className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
           disabled={updateConfigMutation.isPending}
-          data-testid="button-save-brand-config"
+          data-testid="button-update-whatsapp"
         >
-          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Marca'}
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar WhatsApp'}
         </Button>
       </Card>
 
       <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Fondo y Estilo</h3>
-        <div className="space-y-4">
+        <h3 className="text-xl font-bold mb-4 fire-text">Logo y Fondo</h3>
+        <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <Label htmlFor="background-image-url">Imagen de Fondo</Label>
+            <Label htmlFor="logo-url">URL del Logo</Label>
+            <Input
+              id="logo-url"
+              type="url"
+              placeholder="https://ejemplo.com/logo.png"
+              defaultValue={config?.siteContent?.logoUrl}
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-logo-url"
+            />
+          </div>
+          <div>
+            <Label htmlFor="background-image-url">URL de Imagen de Fondo</Label>
             <Input
               id="background-image-url"
               type="url"
-              defaultValue={config?.siteContent?.backgroundImageUrl}
               placeholder="https://ejemplo.com/fondo.jpg"
+              defaultValue={config?.siteContent?.backgroundImageUrl}
               className="bg-input border-border focus:border-primary"
-              data-testid="input-background-image"
+              data-testid="input-background-url"
             />
-            <p className="text-xs text-muted-foreground mt-1">Imagen que aparecerá de fondo en toda la página</p>
-          </div>
-          <div>
-            <Label htmlFor="custom-css">CSS Personalizado</Label>
-            <Textarea
-              id="custom-css"
-              rows={6}
-              defaultValue={config?.siteContent?.customCSS}
-              placeholder=".mi-clase-personalizada { color: red; }"
-              className="bg-input border-border focus:border-primary font-mono text-sm"
-              data-testid="textarea-custom-css"
-            />
-            <p className="text-xs text-muted-foreground mt-1">CSS para personalizar completamente el diseño</p>
           </div>
         </div>
-        <Button 
-          onClick={handleSiteContentUpdate}
-          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
-          disabled={updateConfigMutation.isPending}
-          data-testid="button-update-design"
-        >
-          {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar Diseño'}
-        </Button>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">CSS Personalizado</h3>
+        <div>
+          <Label htmlFor="custom-css">Estilos CSS Personalizados</Label>
+          <Textarea
+            id="custom-css"
+            rows={10}
+            placeholder=".mi-clase { color: red; }"
+            defaultValue={config?.siteContent?.customCSS}
+            className="bg-input border-border focus:border-primary font-mono text-sm"
+            data-testid="textarea-custom-css"
+          />
+        </div>
       </Card>
     </div>
   );
 
   const renderContent = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold fire-text">Contenido y Textos</h2>
-
       <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Sección Principal</h3>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="hero-title">Título Principal</Label>
-            <Input
-              id="hero-title"
-              type="text"
-              defaultValue={config?.siteContent?.heroTitle}
-              placeholder="Producción de Videos Profesionales"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-hero-title"
-            />
-          </div>
-          <div>
-            <Label htmlFor="hero-description">Descripción Principal</Label>
-            <Textarea
-              id="hero-description"
-              rows={3}
-              defaultValue={config?.siteContent?.heroDescription}
-              placeholder="Creamos contenido audiovisual de alta calidad..."
-              className="bg-input border-border focus:border-primary"
-              data-testid="textarea-hero-description"
-            />
-          </div>
+        <h3 className="text-xl font-bold mb-4 fire-text">Sección Hero</h3>
+        <div>
+          <Label htmlFor="hero-title">Título Principal</Label>
+          <Input
+            id="hero-title"
+            type="text"
+            defaultValue={config?.siteContent?.heroTitle}
+            placeholder="Videos Profesionales que Cuentan Tu Historia"
+            className="bg-input border-border focus:border-primary mb-4"
+            data-testid="input-hero-title"
+          />
+          <Label htmlFor="hero-description">Descripción Hero</Label>
+          <Textarea
+            id="hero-description"
+            rows={3}
+            defaultValue={config?.siteContent?.heroDescription}
+            placeholder="Creamos contenido audiovisual de alta calidad..."
+            className="bg-input border-border focus:border-primary"
+            data-testid="textarea-hero-description"
+          />
         </div>
       </Card>
 
       <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Calculadora de Precios</h3>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="calculator-title">Título de la Calculadora</Label>
-            <Input
-              id="calculator-title"
-              type="text"
-              defaultValue={config?.siteContent?.calculatorTitle}
-              placeholder="Calculadora de Precios"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-calculator-title"
-            />
-          </div>
-          <div>
-            <Label htmlFor="calculator-description">Descripción de la Calculadora</Label>
-            <Textarea
-              id="calculator-description"
-              rows={2}
-              defaultValue={config?.siteContent?.calculatorDescription}
-              placeholder="Obtén una cotización instantánea personalizada..."
-              className="bg-input border-border focus:border-primary"
-              data-testid="textarea-calculator-description"
-            />
-          </div>
+        <h3 className="text-xl font-bold mb-4 fire-text">Sección Calculadora</h3>
+        <div>
+          <Label htmlFor="calculator-title">Título de Calculadora</Label>
+          <Input
+            id="calculator-title"
+            type="text"
+            defaultValue={config?.siteContent?.calculatorTitle}
+            placeholder="Calcula tu Inversión"
+            className="bg-input border-border focus:border-primary mb-4"
+            data-testid="input-calculator-title"
+          />
+          <Label htmlFor="calculator-description">Descripción de Calculadora</Label>
+          <Textarea
+            id="calculator-description"
+            rows={3}
+            defaultValue={config?.siteContent?.calculatorDescription}
+            placeholder="Obtén un presupuesto instantáneo..."
+            className="bg-input border-border focus:border-primary"
+            data-testid="textarea-calculator-description"
+          />
         </div>
       </Card>
 
       <Card className="glass-card fire-border p-6">
         <h3 className="text-xl font-bold mb-4 fire-text">Información de Contacto</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="contact-email">Email de Contacto</Label>
-            <Input
-              id="contact-email"
-              type="email"
-              defaultValue={config?.siteContent?.contactEmail}
-              placeholder="info@videoventa.com"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-contact-email"
-            />
-          </div>
-          <div>
-            <Label htmlFor="whatsapp-config">Número de WhatsApp</Label>
-            <Input
-              id="whatsapp-config"
-              type="tel"
-              defaultValue={config?.whatsappNumber}
-              placeholder="+52 55 1234 5678"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-whatsapp-number"
-            />
-          </div>
-        </div>
-        <div className="mt-4">
+        <div>
+          <Label htmlFor="contact-email">Email de Contacto</Label>
+          <Input
+            id="contact-email"
+            type="email"
+            defaultValue={config?.siteContent?.contactEmail}
+            placeholder="info@videoventa.com"
+            className="bg-input border-border focus:border-primary mb-4"
+            data-testid="input-contact-email"
+          />
           <Label htmlFor="company-description">Descripción de la Empresa</Label>
           <Textarea
             id="company-description"
@@ -539,7 +505,7 @@ export default function AdminPanel() {
         </Dialog>
       </div>
 
-      <Card className="glass-card fire-border overflow-hidden">
+      <Card className="glass-card fire-border p-6">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -605,65 +571,174 @@ export default function AdminPanel() {
     </div>
   );
 
-  const renderPricing = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold fire-text">Gestión de Precios</h2>
-        <Button 
-          onClick={() => refetchConfig()}
-          className="fire-gradient text-white font-semibold hover:opacity-90"
-          data-testid="button-sync-calculator"
-        >
-          <DollarSign className="mr-2" size={16} />
-          Sincronizar con Calculadora
-        </Button>
-      </div>
+  const renderPricing = () => {
+    const narratedPricing = config?.pricing?.narratedVideos || {};
+    const singingPackages = config?.pricing?.singingPackages || {};
+    const videoFeatures = narratedPricing?.videoFeatures || [];
 
-      <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Precios por Duración</h3>
-        <div className="space-y-4">
-          {config?.pricing?.durations && Object.entries(config.pricing.durations).map(([key, value]: [string, any]) => (
-            <div key={key} className="grid md:grid-cols-3 gap-4 p-4 border border-border rounded-lg">
-              <div>
-                <Label>{value.label}</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    defaultValue={value.mxn}
-                    className="bg-input border-border focus:border-primary"
-                    onChange={(e) => handlePricingUpdate(`duration-${key}`, 'mxn', parseInt(e.target.value))}
-                    data-testid={`input-duration-${key}-mxn`}
-                  />
-                  <span className="flex items-center text-muted-foreground">MXN</span>
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold fire-text">Gestión de Precios</h2>
+          <Button 
+            onClick={() => refetchConfig()}
+            className="fire-gradient text-white font-semibold hover:opacity-90"
+            data-testid="button-sync-calculator"
+          >
+            <DollarSign className="mr-2" size={16} />
+            Sincronizar con Calculadora
+          </Button>
+        </div>
+
+        {/* Videos Narrados */}
+        <Card className="glass-card fire-border p-6">
+          <h3 className="text-xl font-bold mb-4 fire-text">Videos Narrados - Precios Base</h3>
+          <div className="space-y-4">
+            {narratedPricing?.durations && Object.entries(narratedPricing.durations).map(([key, value]: [string, any]) => (
+              <div key={key} className="grid md:grid-cols-3 gap-4 p-4 border border-border rounded-lg">
+                <div>
+                  <Label>{value.label}</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      type="number"
+                      defaultValue={value.mxn}
+                      className="bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`narratedDuration-${key}`, 'mxn', parseInt(e.target.value))}
+                      data-testid={`input-duration-${key}-mxn`}
+                    />
+                    <span className="flex items-center text-muted-foreground">MXN</span>
+                  </div>
+                </div>
+                <div>
+                  <Label>USD Equivalente</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      type="number"
+                      defaultValue={value.usd}
+                      className="bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`narratedDuration-${key}`, 'usd', parseInt(e.target.value))}
+                      data-testid={`input-duration-${key}-usd`}
+                    />
+                    <span className="flex items-center text-muted-foreground">USD</span>
+                  </div>
+                </div>
+                <div className="flex items-end">
+                  <Button 
+                    className="w-full fire-gradient text-white font-semibold hover:opacity-90"
+                    data-testid={`button-update-duration-${key}`}
+                  >
+                    Actualizar
+                  </Button>
                 </div>
               </div>
-              <div>
-                <Label>USD Equivalente</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    defaultValue={value.usd}
-                    className="bg-input border-border focus:border-primary"
-                    onChange={(e) => handlePricingUpdate(`duration-${key}`, 'usd', parseInt(e.target.value))}
-                    data-testid={`input-duration-${key}-usd`}
-                  />
-                  <span className="flex items-center text-muted-foreground">USD</span>
+            ))}
+          </div>
+          
+          {/* Características */}
+          <div className="mt-6">
+            <h4 className="text-lg font-semibold fire-text mb-3">Características Incluidas</h4>
+            <div className="bg-muted/20 p-4 rounded-lg">
+              <ul className="space-y-2 text-sm">
+                {videoFeatures.map((feature: string, index: number) => (
+                  <li key={index} className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-primary rounded-full"></div>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Card>
+
+        {/* Videos Cantados */}
+        <Card className="glass-card fire-border p-6">
+          <h3 className="text-xl font-bold mb-4 fire-text">Videos Cantados - Paquetes</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(singingPackages).map(([key, pkg]: [string, any]) => (
+              <div key={key} className="p-4 border border-border rounded-lg">
+                <h4 className="font-semibold mb-3 fire-text">{pkg.label}</h4>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Precio MXN</Label>
+                    <Input
+                      type="number"
+                      defaultValue={pkg.mxn}
+                      className="bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`singingPackage-${key}`, 'mxn', parseInt(e.target.value))}
+                      data-testid={`input-singing-${key}-mxn`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Precio USD</Label>
+                    <Input
+                      type="number"
+                      defaultValue={pkg.usd}
+                      className="bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`singingPackage-${key}`, 'usd', parseInt(e.target.value))}
+                      data-testid={`input-singing-${key}-usd`}
+                    />
+                  </div>
+                  <div>
+                    <Label>Videos</Label>
+                    <Input
+                      type="number"
+                      defaultValue={pkg.videos}
+                      className="bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`singingPackage-${key}`, 'videos', parseInt(e.target.value))}
+                      data-testid={`input-singing-${key}-videos`}
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="flex items-end">
-                <Button 
-                  className="w-full fire-gradient text-white font-semibold hover:opacity-90"
-                  data-testid={`button-update-duration-${key}`}
-                >
-                  Actualizar
-                </Button>
+            ))}
+          </div>
+        </Card>
+
+        {/* Multiplicadores */}
+        <Card className="glass-card fire-border p-6">
+          <h3 className="text-xl font-bold mb-4 fire-text">Multiplicadores de Precio</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold mb-3">Velocidad de Entrega</h4>
+              <div className="space-y-2">
+                {narratedPricing?.speeds && Object.entries(narratedPricing.speeds).map(([key, value]: [string, any]) => (
+                  <div key={key} className="flex items-center space-x-2">
+                    <Label className="flex-1">{value.label}</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      defaultValue={value.multiplier}
+                      className="w-24 bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`speed-${key}`, 'multiplier', parseFloat(e.target.value))}
+                      data-testid={`input-speed-${key}`}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-      </Card>
-    </div>
-  );
+            <div>
+              <h4 className="font-semibold mb-3">Cantidad de Videos</h4>
+              <div className="space-y-2">
+                {narratedPricing?.quantities && Object.entries(narratedPricing.quantities).map(([key, value]: [string, any]) => (
+                  <div key={key} className="flex items-center space-x-2">
+                    <Label className="flex-1">{value.label}</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      defaultValue={value.multiplier}
+                      className="w-24 bg-input border-border focus:border-primary"
+                      onChange={(e) => handlePricingUpdate(`quantity-${key}`, 'multiplier', parseFloat(e.target.value))}
+                      data-testid={`input-quantity-${key}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -673,13 +748,12 @@ export default function AdminPanel() {
           <div className="flex items-center justify-between h-16">
             <h1 className="text-2xl font-bold fire-text">Panel de Administración</h1>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Bienvenido, Admin</span>
-              <Button 
+              <Button
+                variant="outline"
                 onClick={() => setLocation('/')}
-                className="fire-gradient text-white font-semibold hover:opacity-90"
+                className="border-primary text-primary hover:bg-primary hover:text-white"
                 data-testid="button-back-to-site"
               >
-                <ArrowLeft className="mr-2" size={16} />
                 Volver al Sitio
               </Button>
             </div>
@@ -687,72 +761,37 @@ export default function AdminPanel() {
         </div>
       </header>
 
+      {/* Admin Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Sidebar Navigation */}
-          <div className="lg:col-span-3">
-            <nav className="glass-card fire-border rounded-xl p-6 space-y-2">
-              <Button
-                onClick={() => setActiveSection('dashboard')}
-                variant={activeSection === 'dashboard' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${activeSection === 'dashboard' ? 'fire-gradient text-white' : ''}`}
-                data-testid="nav-dashboard"
-              >
-                <BarChart3 className="mr-2" size={16} />
-                Dashboard
-              </Button>
-              
-              <Button
-                onClick={() => setActiveSection('design')}
-                variant={activeSection === 'design' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${activeSection === 'design' ? 'fire-gradient text-white' : ''}`}
-                data-testid="nav-design"
-              >
-                <Palette className="mr-2" size={16} />
-                Diseño y Logo
-              </Button>
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-8 glass-card fire-border">
+            <TabsTrigger value="dashboard" data-testid="tab-dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="clients" data-testid="tab-clients">Clientes</TabsTrigger>
+            <TabsTrigger value="pricing" data-testid="tab-pricing">Precios</TabsTrigger>
+            <TabsTrigger value="content" data-testid="tab-content">Contenido</TabsTrigger>
+            <TabsTrigger value="settings" data-testid="tab-settings">Configuración</TabsTrigger>
+          </TabsList>
 
-              <Button
-                onClick={() => setActiveSection('content')}
-                variant={activeSection === 'content' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${activeSection === 'content' ? 'fire-gradient text-white' : ''}`}
-                data-testid="nav-content"
-              >
-                <Type className="mr-2" size={16} />
-                Contenido y Textos
-              </Button>
+          <TabsContent value="dashboard" className="space-y-6">
+            {renderDashboard()}
+          </TabsContent>
 
-              <Button
-                onClick={() => setActiveSection('clients')}
-                variant={activeSection === 'clients' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${activeSection === 'clients' ? 'fire-gradient text-white' : ''}`}
-                data-testid="nav-clients"
-              >
-                <Users className="mr-2" size={16} />
-                Gestión de Clientes
-              </Button>
+          <TabsContent value="clients" className="space-y-6">
+            {renderClients()}
+          </TabsContent>
 
-              <Button
-                onClick={() => setActiveSection('pricing')}
-                variant={activeSection === 'pricing' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${activeSection === 'pricing' ? 'fire-gradient text-white' : ''}`}
-                data-testid="nav-pricing"
-              >
-                <DollarSign className="mr-2" size={16} />
-                Gestión de Precios
-              </Button>
-            </nav>
-          </div>
+          <TabsContent value="pricing" className="space-y-6">
+            {renderPricing()}
+          </TabsContent>
 
-          {/* Main Content */}
-          <div className="lg:col-span-9">
-            {activeSection === 'dashboard' && renderDashboard()}
-            {activeSection === 'design' && renderDesign()}
-            {activeSection === 'content' && renderContent()}
-            {activeSection === 'clients' && renderClients()}
-            {activeSection === 'pricing' && renderPricing()}
-          </div>
-        </div>
+          <TabsContent value="content" className="space-y-6">
+            {renderContent()}
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            {renderSettings()}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
