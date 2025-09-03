@@ -49,13 +49,6 @@ export default function PriceCalculator() {
   const narratedPricing = pricing?.narratedVideos || pricing;
   const singingPackages = pricing?.singingPackages || {};
 
-  // Calcular precio con calidad
-  const applyQualityPrice = (basePrice: number, videoQuality: string) => {
-    if (videoQuality === '2k') return Math.round(basePrice * 1.10);
-    if (videoQuality === '4k') return Math.round(basePrice * 1.25);
-    return basePrice;
-  };
-
   // Calcular precio de paquete cantado con opciones
   const calculateSingingPrice = (pkg: any, videoSpeed: string, videoQuality: string) => {
     let price = pkg.mxn || 0;
@@ -65,7 +58,8 @@ export default function PriceCalculator() {
     if (videoSpeed === 'express') price = Math.round(price * 1.4);
     
     // Aplicar modificador de calidad
-    price = applyQualityPrice(price, videoQuality);
+    if (videoQuality === '2k') price = Math.round(price * 1.10);
+    if (videoQuality === '4k') price = Math.round(price * 1.25);
     
     return price;
   };
@@ -112,7 +106,7 @@ export default function PriceCalculator() {
         const quantityLabel = narratedPricing?.quantities?.[quantity]?.label || quantity;
         const qualityLabel = quality === 'hd' ? 'HD' : quality === '2k' ? '2K' : '4K';
         const deliveryDays = getDeliveryDays(quantity, speed);
-        const finalPrice = applyQualityPrice(calculatedPrice?.totalMXN || 0, quality);
+        const finalPrice = calculatedPrice?.totalMXN || 0;  // Ya viene calculado con calidad
         
         message = `¡Hola! Me interesa ordenar videos narrados con las siguientes características:\n\n📏 Duración: ${durationLabel}\n📦 Cantidad: ${quantityLabel}\n📹 Calidad: ${qualityLabel}\n⏱️ Entrega: ${deliveryDays}\n💰 Total: $${finalPrice.toLocaleString()} MXN\n\n¿Podemos proceder con el pedido?`;
       }
@@ -126,7 +120,7 @@ export default function PriceCalculator() {
     const isNarrated = type !== 'singing';
     const pkg = !isNarrated && packageId ? singingPackages[packageId] : null;
     const finalPrice = isNarrated 
-      ? applyQualityPrice(calculatedPrice?.totalMXN || 0, quality)
+      ? calculatedPrice?.totalMXN || 0  // Ya viene calculado con calidad desde el backend
       : pkg ? calculateSingingPrice(pkg, singingSpeed, singingQuality) : 0;
     
     return (
@@ -245,7 +239,8 @@ export default function PriceCalculator() {
   };
 
   const renderNarratedVideos = () => {
-    const finalPrice = applyQualityPrice(calculatedPrice?.totalMXN || 0, quality);
+    // El precio ya viene calculado con calidad desde el backend
+    const finalPrice = calculatedPrice?.totalMXN || 0;
     
     return (
       <div className="space-y-8">

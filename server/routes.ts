@@ -181,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Price calculation endpoint for narrated videos
   app.post("/api/calculate-price", async (req, res) => {
     try {
-      const { duration, speed, quantity, videoOptions = {} } = req.body;
+      const { duration, speed, quantity, quality = 'hd', videoOptions = {} } = req.body;
       const config = await storage.getSiteConfig();
       
       if (!config) {
@@ -196,6 +196,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!basePrice) {
         return res.status(400).json({ message: "Invalid duration" });
+      }
+
+      // Calculate quality modifier
+      let qualityMultiplier = 1.0;
+      if (quality === '2k') {
+        qualityMultiplier = 1.10;
+      } else if (quality === '4k') {
+        qualityMultiplier = 1.25;
       }
 
       // Calculate video options modifiers
@@ -215,14 +223,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      const totalMXN = Math.round(basePrice.mxn * speedMultiplier * quantityMultiplier * videoOptionsMultiplier);
-      const totalUSD = Math.round(basePrice.usd * speedMultiplier * quantityMultiplier * videoOptionsMultiplier);
+      const totalMXN = Math.round(basePrice.mxn * speedMultiplier * quantityMultiplier * qualityMultiplier * videoOptionsMultiplier);
+      const totalUSD = Math.round(basePrice.usd * speedMultiplier * quantityMultiplier * qualityMultiplier * videoOptionsMultiplier);
 
       res.json({
         basePriceMXN: basePrice.mxn,
         basePriceUSD: basePrice.usd,
         speedMultiplier,
         quantityMultiplier,
+        qualityMultiplier,
         videoOptionsMultiplier,
         selectedOptions,
         totalMXN,
