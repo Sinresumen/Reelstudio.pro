@@ -61,10 +61,18 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
     },
     onError: (error: any) => {
       console.error('Error creating project:', error);
-      const message = error?.message || "No se pudo crear el proyecto";
+      let errorMessage = "No se pudo crear el proyecto";
+      
+      // Hacer el error más legible y copiable
+      if (error?.message) {
+        errorMessage = error.message;
+        // Copiar al portapapeles automáticamente
+        navigator.clipboard.writeText(error.message).catch(console.error);
+      }
+      
       toast({
-        title: "Error",
-        description: message,
+        title: "Error (copiado al portapapeles)",
+        description: <div className="select-text">{errorMessage}</div>,
         variant: "destructive",
       });
     },
@@ -124,7 +132,7 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
       name: formData.get('name') as string,
       type: formData.get('type') as string,
       status: formData.get('status') as string,
-      deliveryDate: new Date().toISOString(),
+      // No enviamos deliveryDate, es opcional
     };
     createProjectMutation.mutate(project);
   };
