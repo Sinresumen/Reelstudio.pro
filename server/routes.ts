@@ -178,10 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Price calculation endpoint
+  // Price calculation endpoint for narrated videos
   app.post("/api/calculate-price", async (req, res) => {
     try {
-      const { duration, speed, quantity } = req.body;
+      const { duration, speed, quantity, videoOptions = {} } = req.body;
       const config = await storage.getSiteConfig();
       
       if (!config) {
@@ -189,22 +189,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const pricing = config.pricing as any;
-      const basePrice = pricing.durations[duration];
-      const speedMultiplier = pricing.speeds[speed].multiplier;
-      const quantityMultiplier = pricing.quantities[quantity].multiplier;
+      const narratedPricing = pricing.narratedVideos;
+      const basePrice = narratedPricing.durations[duration];
+      const speedMultiplier = narratedPricing.speeds[speed].multiplier;
+      const quantityMultiplier = narratedPricing.quantities[quantity].multiplier;
 
       if (!basePrice) {
         return res.status(400).json({ message: "Invalid duration" });
       }
 
-      const totalMXN = Math.round(basePrice.mxn * speedMultiplier * quantityMultiplier);
-      const totalUSD = Math.round(basePrice.usd * speedMultiplier * quantityMultiplier);
+      // Calculate video options modifiers
+      let videoOptionsMultiplier = 1.0;
+      const selectedOptions: any = {};
+      
+      Object.keys(videoOptions).forEach(optionType => {
+        const selectedValue = videoOptions[optionType];
+        if (narratedPricing.videoOptions[optionType]?.options[selectedValue]) {
+          const option = narratedPricing.videoOptions[optionType].options[selectedValue];
+          videoOptionsMultiplier *= option.priceModifier;
+          selectedOptions[optionType] = {
+            value: selectedValue,
+            label: option.label,
+            modifier: option.priceModifier
+          };
+        }
+      });
+
+      const totalMXN = Math.round(basePrice.mxn * speedMultiplier * quantityMultiplier * videoOptionsMultiplier);
+      const totalUSD = Math.round(basePrice.usd * speedMultiplier * quantityMultiplier * videoOptionsMultiplier);
 
       res.json({
         basePriceMXN: basePrice.mxn,
         basePriceUSD: basePrice.usd,
         speedMultiplier,
         quantityMultiplier,
+        videoOptionsMultiplier,
+        selectedOptions,
         totalMXN,
         totalUSD
       });

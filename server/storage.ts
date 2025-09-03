@@ -54,21 +54,79 @@ export class MemStorage implements IStorage {
 
   private getDefaultPricing(): PricingConfig {
     return {
-      durations: {
-        "5-10": { mxn: 1600, usd: 89, label: "5-10 minutos" },
-        "10-20": { mxn: 2600, usd: 144, label: "10-20 minutos" },
-        "20-30": { mxn: 3500, usd: 194, label: "20-30 minutos" }
-      },
-      speeds: {
-        normal: { multiplier: 1.0, label: "Normal (2-5 días)" },
-        fast: { multiplier: 1.2, label: "Rápido (2-3 días)" },
-        extreme: { multiplier: 1.5, label: "Extremo (1-2 días)" }
-      },
-      quantities: {
-        15: { multiplier: 1.0, label: "15 videos" },
-        30: { multiplier: 1.8, label: "30 videos" },
-        60: { multiplier: 3.2, label: "60 videos" },
-        120: { multiplier: 5.8, label: "120 videos" }
+      narratedVideos: {
+        durations: {
+          "5-10": { mxn: 1600, usd: 89, label: "5-10 minutos" },
+          "10-20": { mxn: 2600, usd: 144, label: "10-20 minutos" },
+          "20-30": { mxn: 3500, usd: 194, label: "20-30 minutos" }
+        },
+        speeds: {
+          normal: { multiplier: 1.0, label: "Normal (2-5 días)" },
+          fast: { multiplier: 1.2, label: "Rápido (2-3 días)" },
+          extreme: { multiplier: 1.5, label: "Extremo (1-2 días)" }
+        },
+        quantities: {
+          15: { multiplier: 1.0, label: "15 videos" },
+          30: { multiplier: 1.8, label: "30 videos" },
+          60: { multiplier: 3.2, label: "60 videos" },
+          120: { multiplier: 5.8, label: "120 videos" }
+        },
+        videoOptions: {
+          quality: {
+            id: "quality",
+            name: "Calidad de Video",
+            description: "Resolución y formato del video",
+            options: {
+              "hd-horizontal": { label: "HD Horizontal (1920x1080)", priceModifier: 1.0, available: true },
+              "hd-vertical": { label: "HD Vertical (1080x1920)", priceModifier: 1.1, available: true },
+              "4k-horizontal": { label: "4K Horizontal (3840x2160)", priceModifier: 1.5, available: true },
+              "4k-vertical": { label: "4K Vertical (2160x3840)", priceModifier: 1.6, available: true }
+            }
+          },
+          style: {
+            id: "style",
+            name: "Estilo de Imágenes",
+            description: "Estilo visual del video",
+            options: {
+              "2d": { label: "2D Tradicional", priceModifier: 1.0, available: true },
+              "2.5d": { label: "2.5D Dinámico", priceModifier: 1.2, available: true },
+              "3d": { label: "3D Realista", priceModifier: 1.4, available: true },
+              "anime": { label: "Estilo Anime", priceModifier: 1.1, available: true }
+            }
+          },
+          storyTheme: {
+            id: "storyTheme",
+            name: "Tema de Historia",
+            description: "Temática y ambiente del video",
+            options: {
+              "guerra": { label: "Guerra y Batallas", priceModifier: 1.0, available: true },
+              "peleas": { label: "Peleas y Combate", priceModifier: 1.0, available: true },
+              "angeles": { label: "Ángeles y Celestial", priceModifier: 1.1, available: true },
+              "fantasia": { label: "Fantasía Medieval", priceModifier: 1.1, available: true },
+              "futurista": { label: "Ciencia Ficción", priceModifier: 1.2, available: true },
+              "historico": { label: "Histórico", priceModifier: 1.0, available: true }
+            }
+          },
+          editingLevel: {
+            id: "editingLevel",
+            name: "Nivel de Edición",
+            description: "Complejidad de la edición",
+            options: {
+              "basica": { label: "1 Edición Básica", priceModifier: 1.0, available: true },
+              "avanzada": { label: "2 Ediciones Avanzadas", priceModifier: 1.3, available: true },
+              "profesional": { label: "3 Ediciones Profesionales", priceModifier: 1.6, available: true }
+            }
+          },
+          customPrompt: {
+            id: "customPrompt",
+            name: "Prompt Personalizado",
+            description: "Personalización del contenido",
+            options: {
+              "incluido": { label: "Prompt Personalizado Incluido", priceModifier: 1.1, available: true },
+              "no-incluido": { label: "Sin Personalización", priceModifier: 1.0, available: true }
+            }
+          }
+        }
       },
       singingPackages: {
         basic: { mxn: 1600, usd: 89, videos: 15, label: "Básico" },

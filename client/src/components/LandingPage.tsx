@@ -170,35 +170,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer - Simplified */}
-      <footer className="bg-card border-t border-border py-12">
+      {/* Footer - Minimal */}
+      <footer className="bg-card border-t border-border py-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              {config?.siteContent?.logoUrl ? (
-                <img 
-                  src={config.siteContent.logoUrl} 
-                  alt="Logo" 
-                  className="w-8 h-8 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
-                  <Video className="text-white" size={16} />
-                </div>
-              )}
-              <span className="text-xl font-bold fire-text">{config?.businessName || 'VideoVenta'}</span>
-            </div>
-            <p className="text-muted-foreground mb-6">
-              {config?.siteContent?.companyDescription || 'Creamos contenido audiovisual profesional que impulsa tu marca y conecta con tu audiencia.'}
-            </p>
-            <div className="flex items-center justify-center space-x-6">
-              <div className="flex items-center">
-                <Phone className="mr-2" size={16} />
-                <span>{config?.whatsappNumber || '+52 55 1234 5678'}</span>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+          <div className="text-center text-muted-foreground">
             <p>&copy; 2024 {config?.businessName || 'VideoVenta'}. Todos los derechos reservados.</p>
           </div>
         </div>

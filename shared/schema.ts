@@ -62,18 +62,46 @@ export type InsertProject = z.infer<typeof insertProjectSchema>;
 
 // Pricing structure type
 export type PricingConfig = {
-  durations: {
-    [key: string]: { mxn: number; usd: number; label: string };
-  };
-  speeds: {
-    [key: string]: { multiplier: number; label: string };
-  };
-  quantities: {
-    [key: string]: { multiplier: number; label: string };
+  narratedVideos: {
+    durations: {
+      [key: string]: { mxn: number; usd: number; label: string };
+    };
+    speeds: {
+      [key: string]: { multiplier: number; label: string };
+    };
+    quantities: {
+      [key: string]: { multiplier: number; label: string };
+    };
+    videoOptions: {
+      [key: string]: VideoOption;
+    };
   };
   singingPackages: {
     [key: string]: { mxn: number; usd: number; videos: number; label: string };
   };
+};
+
+// Video configuration options
+export type VideoOption = {
+  id: string;
+  name: string;
+  description: string;
+  options: {
+    [key: string]: {
+      label: string;
+      priceModifier: number; // multiplier for price
+      available: boolean;
+    };
+  };
+};
+
+// Video quality and style options
+export type VideoOptionsConfig = {
+  quality: VideoOption;
+  style: VideoOption;
+  storyTheme: VideoOption;
+  editingLevel: VideoOption;
+  customPrompt: VideoOption;
 };
 
 // Sample video type
