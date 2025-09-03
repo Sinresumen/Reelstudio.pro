@@ -1,0 +1,94 @@
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, jsonb, timestamp, integer } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const clients = pgTable("clients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  username: text("username").notNull().unique(),
+  projects: jsonb("projects").default(sql`'[]'`),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const siteConfig = pgTable("site_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  whatsappNumber: text("whatsapp_number").notNull(),
+  businessName: text("business_name").notNull(),
+  pricing: jsonb("pricing").notNull(),
+  sampleVideos: jsonb("sample_videos").default(sql`'[]'`),
+  siteContent: jsonb("site_content").default(sql`'{}'`),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projects = pgTable("projects", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clientId: varchar("client_id").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  duration: text("duration"),
+  quantity: integer("quantity"),
+  status: text("status").default("pending"),
+  downloadLinks: jsonb("download_links").default(sql`'[]'`),
+  deliveryDate: timestamp("delivery_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertClientSchema = createInsertSchema(clients).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSiteConfigSchema = createInsertSchema(siteConfig).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = z.infer<typeof insertClientSchema>;
+
+export type SiteConfig = typeof siteConfig.$inferSelect;
+export type InsertSiteConfig = z.infer<typeof insertSiteConfigSchema>;
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+
+// Pricing structure type
+export type PricingConfig = {
+  durations: {
+    [key: string]: { mxn: number; usd: number; label: string };
+  };
+  speeds: {
+    [key: string]: { multiplier: number; label: string };
+  };
+  quantities: {
+    [key: string]: { multiplier: number; label: string };
+  };
+  singingPackages: {
+    [key: string]: { mxn: number; usd: number; videos: number; label: string };
+  };
+};
+
+// Sample video type
+export type SampleVideo = {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  videoUrl: string;
+};
+
+// Site content type
+export type SiteContent = {
+  heroTitle: string;
+  heroDescription: string;
+  contactEmail: string;
+  companyDescription: string;
+};
