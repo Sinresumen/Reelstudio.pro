@@ -110,7 +110,12 @@ export class MemStorage implements IStorage {
       heroTitle: "Producción de Videos Profesionales",
       heroDescription: "Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.",
       contactEmail: "info@videoventa.com",
-      companyDescription: "Creamos contenido audiovisual profesional que impulsa tu marca y conecta con tu audiencia."
+      companyDescription: "Creamos contenido audiovisual profesional que impulsa tu marca y conecta con tu audiencia.",
+      logoUrl: "",
+      calculatorTitle: "Calculadora de Precios",
+      calculatorDescription: "Obtén una cotización instantánea personalizada para tu proyecto",
+      backgroundImageUrl: "",
+      customCSS: ""
     };
   }
 

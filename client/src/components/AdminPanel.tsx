@@ -13,7 +13,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart3, Users, Video, Settings, DollarSign, Edit, ArrowLeft, Plus, Eye, Trash2 } from 'lucide-react';
+import { BarChart3, Users, Video, Settings, DollarSign, Edit, ArrowLeft, Plus, Eye, Trash2, Image, Palette, Type } from 'lucide-react';
 import type { Client, InsertClient } from '@shared/schema';
 
 export default function AdminPanel() {
@@ -60,6 +60,33 @@ export default function AdminPanel() {
     };
 
     createClientMutation.mutate(clientData);
+  };
+
+  const handleSiteContentUpdate = () => {
+    const heroTitle = (document.getElementById('hero-title') as HTMLInputElement)?.value;
+    const heroDescription = (document.getElementById('hero-description') as HTMLTextAreaElement)?.value;
+    const calculatorTitle = (document.getElementById('calculator-title') as HTMLInputElement)?.value;
+    const calculatorDescription = (document.getElementById('calculator-description') as HTMLTextAreaElement)?.value;
+    const contactEmail = (document.getElementById('contact-email') as HTMLInputElement)?.value;
+    const companyDescription = (document.getElementById('company-description') as HTMLTextAreaElement)?.value;
+    const logoUrl = (document.getElementById('logo-url') as HTMLInputElement)?.value;
+    const backgroundImageUrl = (document.getElementById('background-image-url') as HTMLInputElement)?.value;
+    const customCSS = (document.getElementById('custom-css') as HTMLTextAreaElement)?.value;
+
+    updateConfigMutation.mutate({
+      siteContent: {
+        ...config?.siteContent,
+        heroTitle,
+        heroDescription,
+        calculatorTitle,
+        calculatorDescription,
+        contactEmail,
+        companyDescription,
+        logoUrl,
+        backgroundImageUrl,
+        customCSS,
+      },
+    });
   };
 
   const handleWhatsAppConfigSave = () => {
@@ -139,22 +166,269 @@ export default function AdminPanel() {
       </div>
 
       <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Actividad Reciente</h3>
+        <h3 className="text-xl font-bold mb-4 fire-text">Acceso Rápido</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Button 
+            onClick={() => setActiveSection('design')}
+            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
+          >
+            <Palette size={24} className="mb-2" />
+            Diseño y Logo
+          </Button>
+          <Button 
+            onClick={() => setActiveSection('content')}
+            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
+          >
+            <Type size={24} className="mb-2" />
+            Textos y Contenido
+          </Button>
+          <Button 
+            onClick={() => setActiveSection('pricing')}
+            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
+          >
+            <DollarSign size={24} className="mb-2" />
+            Precios
+          </Button>
+          <Button 
+            onClick={() => setActiveSection('clients')}
+            className="fire-gradient text-white font-semibold hover:opacity-90 h-20 flex-col"
+          >
+            <Users size={24} className="mb-2" />
+            Clientes
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+
+  const renderDesign = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold fire-text">Diseño y Apariencia</h2>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Logo y Marca</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="logo-url">URL del Logo</Label>
+            <Input
+              id="logo-url"
+              type="url"
+              defaultValue={config?.siteContent?.logoUrl}
+              placeholder="https://ejemplo.com/logo.png"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-logo-url"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Si no se proporciona, se usará el ícono predeterminado</p>
+          </div>
+          <div>
+            <Label htmlFor="business-name-config">Nombre del Negocio</Label>
+            <Input
+              id="business-name-config"
+              type="text"
+              defaultValue={config?.businessName}
+              placeholder="VideoVenta"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-business-name"
+            />
+          </div>
+        </div>
+        <Button 
+          onClick={handleWhatsAppConfigSave}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-save-brand-config"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Marca'}
+        </Button>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Fondo y Estilo</h3>
         <div className="space-y-4">
-          {clients.slice(0, 3).map((client) => (
-            <div key={client.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
-                  <Plus className="text-white" size={12} />
-                </div>
-                <div>
-                  <p className="font-medium">Cliente agregado</p>
-                  <p className="text-sm text-muted-foreground">{client.name}</p>
+          <div>
+            <Label htmlFor="background-image-url">Imagen de Fondo</Label>
+            <Input
+              id="background-image-url"
+              type="url"
+              defaultValue={config?.siteContent?.backgroundImageUrl}
+              placeholder="https://ejemplo.com/fondo.jpg"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-background-image"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Imagen que aparecerá de fondo en toda la página</p>
+          </div>
+          <div>
+            <Label htmlFor="custom-css">CSS Personalizado</Label>
+            <Textarea
+              id="custom-css"
+              rows={6}
+              defaultValue={config?.siteContent?.customCSS}
+              placeholder=".mi-clase-personalizada { color: red; }"
+              className="bg-input border-border focus:border-primary font-mono text-sm"
+              data-testid="textarea-custom-css"
+            />
+            <p className="text-xs text-muted-foreground mt-1">CSS para personalizar completamente el diseño</p>
+          </div>
+        </div>
+        <Button 
+          onClick={handleSiteContentUpdate}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-update-design"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar Diseño'}
+        </Button>
+      </Card>
+    </div>
+  );
+
+  const renderContent = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold fire-text">Contenido y Textos</h2>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Sección Principal</h3>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="hero-title">Título Principal</Label>
+            <Input
+              id="hero-title"
+              type="text"
+              defaultValue={config?.siteContent?.heroTitle}
+              placeholder="Producción de Videos Profesionales"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-hero-title"
+            />
+          </div>
+          <div>
+            <Label htmlFor="hero-description">Descripción Principal</Label>
+            <Textarea
+              id="hero-description"
+              rows={3}
+              defaultValue={config?.siteContent?.heroDescription}
+              placeholder="Creamos contenido audiovisual de alta calidad..."
+              className="bg-input border-border focus:border-primary"
+              data-testid="textarea-hero-description"
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Calculadora de Precios</h3>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="calculator-title">Título de la Calculadora</Label>
+            <Input
+              id="calculator-title"
+              type="text"
+              defaultValue={config?.siteContent?.calculatorTitle}
+              placeholder="Calculadora de Precios"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-calculator-title"
+            />
+          </div>
+          <div>
+            <Label htmlFor="calculator-description">Descripción de la Calculadora</Label>
+            <Textarea
+              id="calculator-description"
+              rows={2}
+              defaultValue={config?.siteContent?.calculatorDescription}
+              placeholder="Obtén una cotización instantánea personalizada..."
+              className="bg-input border-border focus:border-primary"
+              data-testid="textarea-calculator-description"
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Información de Contacto</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="contact-email">Email de Contacto</Label>
+            <Input
+              id="contact-email"
+              type="email"
+              defaultValue={config?.siteContent?.contactEmail}
+              placeholder="info@videoventa.com"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-contact-email"
+            />
+          </div>
+          <div>
+            <Label htmlFor="whatsapp-config">Número de WhatsApp</Label>
+            <Input
+              id="whatsapp-config"
+              type="tel"
+              defaultValue={config?.whatsappNumber}
+              placeholder="+52 55 1234 5678"
+              className="bg-input border-border focus:border-primary"
+              data-testid="input-whatsapp-number"
+            />
+          </div>
+        </div>
+        <div className="mt-4">
+          <Label htmlFor="company-description">Descripción de la Empresa</Label>
+          <Textarea
+            id="company-description"
+            rows={3}
+            defaultValue={config?.siteContent?.companyDescription}
+            placeholder="Creamos contenido audiovisual profesional..."
+            className="bg-input border-border focus:border-primary"
+            data-testid="textarea-company-description"
+          />
+        </div>
+        <Button 
+          onClick={handleSiteContentUpdate}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-update-content"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar Contenido'}
+        </Button>
+      </Card>
+
+      <Card className="glass-card fire-border p-6">
+        <h3 className="text-xl font-bold mb-4 fire-text">Videos de Muestra</h3>
+        <div className="grid md:grid-cols-3 gap-6">
+          {config?.sampleVideos?.map((video: any, index: number) => (
+            <div key={video.id || index} className="border border-border rounded-lg p-4">
+              <div className="aspect-video bg-muted rounded-lg mb-4 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/50 to-orange-900/50 rounded-lg"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Video className="text-white" size={32} />
                 </div>
               </div>
-              <span className="text-sm text-muted-foreground">
-                {client.createdAt ? new Date(client.createdAt).toLocaleDateString() : 'Reciente'}
-              </span>
+              <div className="space-y-3">
+                <Input
+                  type="text"
+                  placeholder="Título del video"
+                  defaultValue={video.title}
+                  className="bg-input border-border focus:border-primary"
+                  data-testid={`input-video-title-${index}`}
+                />
+                <Input
+                  type="text"
+                  placeholder="Descripción"
+                  defaultValue={video.description}
+                  className="bg-input border-border focus:border-primary"
+                  data-testid={`input-video-description-${index}`}
+                />
+                <Input
+                  type="url"
+                  placeholder="URL de la imagen"
+                  defaultValue={video.thumbnail}
+                  className="bg-input border-border focus:border-primary"
+                  data-testid={`input-video-thumbnail-${index}`}
+                />
+                <Button 
+                  className="w-full fire-gradient text-white font-semibold hover:opacity-90"
+                  data-testid={`button-update-video-${index}`}
+                >
+                  Actualizar
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -331,95 +605,6 @@ export default function AdminPanel() {
     </div>
   );
 
-  const renderConfig = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold fire-text">Configuración Global</h2>
-
-      <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">WhatsApp Integration</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="whatsapp-config">Número de WhatsApp</Label>
-            <Input
-              id="whatsapp-config"
-              type="tel"
-              defaultValue={config?.whatsappNumber}
-              placeholder="+52 55 1234 5678"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-whatsapp-number"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Formato: +52 55 1234 5678</p>
-          </div>
-          <div>
-            <Label htmlFor="business-name-config">Nombre del Negocio</Label>
-            <Input
-              id="business-name-config"
-              type="text"
-              defaultValue={config?.businessName}
-              placeholder="VideoVenta"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-business-name"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Aparece en mensajes de WhatsApp</p>
-          </div>
-        </div>
-        <Button 
-          onClick={handleWhatsAppConfigSave}
-          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
-          disabled={updateConfigMutation.isPending}
-          data-testid="button-save-whatsapp-config"
-        >
-          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Configuración'}
-        </Button>
-      </Card>
-
-      <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Configuración del Sitio</h3>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="hero-title">Título Principal</Label>
-            <Input
-              id="hero-title"
-              type="text"
-              defaultValue={config?.siteContent?.heroTitle}
-              placeholder="Producción de Videos Profesionales"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-hero-title"
-            />
-          </div>
-          <div>
-            <Label htmlFor="hero-description">Descripción del Hero</Label>
-            <Textarea
-              id="hero-description"
-              rows={3}
-              defaultValue={config?.siteContent?.heroDescription}
-              placeholder="Creamos contenido audiovisual de alta calidad..."
-              className="bg-input border-border focus:border-primary"
-              data-testid="textarea-hero-description"
-            />
-          </div>
-          <div>
-            <Label htmlFor="contact-email">Email de Contacto</Label>
-            <Input
-              id="contact-email"
-              type="email"
-              defaultValue={config?.siteContent?.contactEmail}
-              placeholder="info@videoventa.com"
-              className="bg-input border-border focus:border-primary"
-              data-testid="input-contact-email"
-            />
-          </div>
-        </div>
-        <Button 
-          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
-          data-testid="button-update-site-content"
-        >
-          Actualizar Contenido
-        </Button>
-      </Card>
-    </div>
-  );
-
   const renderPricing = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -480,57 +665,6 @@ export default function AdminPanel() {
     </div>
   );
 
-  const renderContent = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold fire-text">Gestión de Contenido</h2>
-
-      <Card className="glass-card fire-border p-6">
-        <h3 className="text-xl font-bold mb-4 fire-text">Videos de Muestra</h3>
-        <div className="grid md:grid-cols-3 gap-6">
-          {config?.sampleVideos?.map((video: any, index: number) => (
-            <div key={video.id || index} className="border border-border rounded-lg p-4">
-              <div className="aspect-video bg-muted rounded-lg mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-red-900/50 to-orange-900/50 rounded-lg"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Video className="text-white" size={32} />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <Input
-                  type="text"
-                  placeholder="Título del video"
-                  defaultValue={video.title}
-                  className="bg-input border-border focus:border-primary"
-                  data-testid={`input-video-title-${index}`}
-                />
-                <Input
-                  type="text"
-                  placeholder="Descripción"
-                  defaultValue={video.description}
-                  className="bg-input border-border focus:border-primary"
-                  data-testid={`input-video-description-${index}`}
-                />
-                <Input
-                  type="url"
-                  placeholder="URL del video"
-                  defaultValue={video.videoUrl}
-                  className="bg-input border-border focus:border-primary"
-                  data-testid={`input-video-url-${index}`}
-                />
-                <Button 
-                  className="w-full fire-gradient text-white font-semibold hover:opacity-90"
-                  data-testid={`button-update-video-${index}`}
-                >
-                  Actualizar
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Admin Header */}
@@ -559,70 +693,64 @@ export default function AdminPanel() {
           <div className="lg:col-span-3">
             <nav className="glass-card fire-border rounded-xl p-6 space-y-2">
               <Button
-                variant={activeSection === 'dashboard' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${
-                  activeSection === 'dashboard' ? 'fire-gradient text-white' : ''
-                }`}
                 onClick={() => setActiveSection('dashboard')}
+                variant={activeSection === 'dashboard' ? 'default' : 'ghost'}
+                className={`w-full justify-start ${activeSection === 'dashboard' ? 'fire-gradient text-white' : ''}`}
                 data-testid="nav-dashboard"
               >
                 <BarChart3 className="mr-2" size={16} />
                 Dashboard
               </Button>
+              
               <Button
-                variant={activeSection === 'clients' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${
-                  activeSection === 'clients' ? 'fire-gradient text-white' : ''
-                }`}
+                onClick={() => setActiveSection('design')}
+                variant={activeSection === 'design' ? 'default' : 'ghost'}
+                className={`w-full justify-start ${activeSection === 'design' ? 'fire-gradient text-white' : ''}`}
+                data-testid="nav-design"
+              >
+                <Palette className="mr-2" size={16} />
+                Diseño y Logo
+              </Button>
+
+              <Button
+                onClick={() => setActiveSection('content')}
+                variant={activeSection === 'content' ? 'default' : 'ghost'}
+                className={`w-full justify-start ${activeSection === 'content' ? 'fire-gradient text-white' : ''}`}
+                data-testid="nav-content"
+              >
+                <Type className="mr-2" size={16} />
+                Contenido y Textos
+              </Button>
+
+              <Button
                 onClick={() => setActiveSection('clients')}
+                variant={activeSection === 'clients' ? 'default' : 'ghost'}
+                className={`w-full justify-start ${activeSection === 'clients' ? 'fire-gradient text-white' : ''}`}
                 data-testid="nav-clients"
               >
                 <Users className="mr-2" size={16} />
                 Gestión de Clientes
               </Button>
+
               <Button
-                variant={activeSection === 'config' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${
-                  activeSection === 'config' ? 'fire-gradient text-white' : ''
-                }`}
-                onClick={() => setActiveSection('config')}
-                data-testid="nav-config"
-              >
-                <Settings className="mr-2" size={16} />
-                Configuración
-              </Button>
-              <Button
-                variant={activeSection === 'pricing' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${
-                  activeSection === 'pricing' ? 'fire-gradient text-white' : ''
-                }`}
                 onClick={() => setActiveSection('pricing')}
+                variant={activeSection === 'pricing' ? 'default' : 'ghost'}
+                className={`w-full justify-start ${activeSection === 'pricing' ? 'fire-gradient text-white' : ''}`}
                 data-testid="nav-pricing"
               >
                 <DollarSign className="mr-2" size={16} />
-                Precios
-              </Button>
-              <Button
-                variant={activeSection === 'content' ? 'default' : 'ghost'}
-                className={`w-full justify-start ${
-                  activeSection === 'content' ? 'fire-gradient text-white' : ''
-                }`}
-                onClick={() => setActiveSection('content')}
-                data-testid="nav-content"
-              >
-                <Edit className="mr-2" size={16} />
-                Contenido
+                Gestión de Precios
               </Button>
             </nav>
           </div>
 
-          {/* Main Content Area */}
+          {/* Main Content */}
           <div className="lg:col-span-9">
             {activeSection === 'dashboard' && renderDashboard()}
-            {activeSection === 'clients' && renderClients()}
-            {activeSection === 'config' && renderConfig()}
-            {activeSection === 'pricing' && renderPricing()}
+            {activeSection === 'design' && renderDesign()}
             {activeSection === 'content' && renderContent()}
+            {activeSection === 'clients' && renderClients()}
+            {activeSection === 'pricing' && renderPricing()}
           </div>
         </div>
       </div>

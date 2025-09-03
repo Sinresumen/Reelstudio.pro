@@ -91,4 +91,9 @@ export type SiteContent = {
   heroDescription: string;
   contactEmail: string;
   companyDescription: string;
+  logoUrl?: string;
+  calculatorTitle?: string;
+  calculatorDescription?: string;
+  backgroundImageUrl?: string;
+  customCSS?: string;
 };

@@ -80,7 +80,7 @@ export default function PriceCalculator() {
             <SelectContent>
               {pricing?.quantities && Object.entries(pricing.quantities).map(([key, value]: [string, any]) => (
                 <SelectItem key={key} value={key}>
-                  {value.label} (x{value.multiplier})
+                  {value.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -96,7 +96,7 @@ export default function PriceCalculator() {
             <SelectContent>
               {pricing?.speeds && Object.entries(pricing.speeds).map(([key, value]: [string, any]) => (
                 <SelectItem key={key} value={key}>
-                  {value.label} - {value.multiplier === 1 ? 'Sin recargo' : `+${Math.round((value.multiplier - 1) * 100)}%`}
+                  {value.label.split(' - ')[0]} {value.multiplier > 1 ? `- +${Math.round((value.multiplier - 1) * 100)}%` : ''}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -106,28 +106,8 @@ export default function PriceCalculator() {
 
       <div className="space-y-6">
         <Card className="glass-card fire-border bg-gradient-to-br from-orange-900/20 to-red-900/20 p-6">
-          <h3 className="text-xl font-bold mb-4 fire-text">Resumen del Proyecto</h3>
+          <h3 className="text-xl font-bold mb-4 fire-text">Tu Cotización</h3>
           <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Precio base:</span>
-              <span className="font-semibold" data-testid="text-base-price">
-                ${calculatedPrice?.basePriceMXN?.toLocaleString() || '0'} MXN
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Cantidad:</span>
-              <span className="font-semibold" data-testid="text-quantity-display">
-                {pricing?.quantities?.[quantity]?.label || `${quantity} videos`} (x{calculatedPrice?.quantityMultiplier || 1})
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Velocidad:</span>
-              <span className="font-semibold" data-testid="text-speed-display">
-                {pricing?.speeds?.[speed]?.label?.split(' - ')[0] || speed} 
-                {calculatedPrice?.speedMultiplier > 1 ? ` (+${Math.round((calculatedPrice.speedMultiplier - 1) * 100)}%)` : ' (Sin recargo)'}
-              </span>
-            </div>
-            <hr className="border-border" />
             <div className="flex justify-between text-xl font-bold">
               <span className="fire-text">Total:</span>
               <span className="fire-text" data-testid="text-total-price">
