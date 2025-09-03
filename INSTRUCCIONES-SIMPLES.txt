@@ -1,0 +1,48 @@
+🎬 INSTALACIÓN SÚPER FÁCIL - REELSTUDIO.PRO
+=============================================
+
+SOLO 3 PASOS - NO NECESITAS SABER PROGRAMACIÓN
+
+📁 PASO 1: SUBIR ARCHIVOS
+-------------------------
+Sube estos archivos a tu hosting:
+- package.json
+- setup.js  
+- server.js
+- public/ (carpeta completa)
+
+📊 PASO 2: CONFIGURAR BASE DE DATOS
+----------------------------------
+En tu hosting, abre el "Terminal" o "SSH" y ejecuta:
+
+npm install
+node setup.js
+
+Te preguntará:
+- Host de MySQL: (tu hosting te lo da, ej: localhost)
+- Puerto: (presiona Enter para usar 3306)
+- Usuario: (el que creaste en el panel)
+- Contraseña: (la que pusiste)
+- Nombre de base de datos: reelstudio
+
+🚀 PASO 3: INICIAR EL SITIO
+---------------------------
+En el mismo terminal, ejecuta:
+
+node server.js
+
+¡YA ESTÁ! Tu sitio estará en: http://tu-dominio.com
+
+📝 DATOS IMPORTANTES:
+--------------------
+- Panel de admin: Haz 5 clics en el logo del sitio
+- Contraseña de admin: Lothborja1
+- Para editar contenido: Ve al panel de admin
+
+🆘 SI ALGO NO FUNCIONA:
+----------------------
+1. Verifica que la base de datos "reelstudio" existe
+2. Verifica que el usuario de MySQL tiene permisos
+3. Contacta al soporte de tu hosting
+
+¡ESO ES TODO! 🎉
