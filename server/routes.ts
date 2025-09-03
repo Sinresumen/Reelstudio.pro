@@ -76,6 +76,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/config", requireAuth as any, async (req, res) => {
+    try {
+      const updates = req.body;
+      const updatedConfig = await storage.updateSiteConfig(updates);
+      res.json(updatedConfig);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating configuration" });
+    }
+  });
+
   app.put("/api/config", requireAuth as any, async (req, res) => {
     try {
       const updates = req.body;
