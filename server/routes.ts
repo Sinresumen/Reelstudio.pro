@@ -190,13 +190,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const pricing = config.pricing as any;
       const narratedPricing = pricing.narratedVideos;
+      
+      // Validar que existen los datos necesarios
+      if (!narratedPricing || !narratedPricing.durations || !narratedPricing.speeds || !narratedPricing.quantities) {
+        return res.status(500).json({ message: "Invalid pricing configuration" });
+      }
+      
       const basePrice = narratedPricing.durations[duration];
-      const speedMultiplier = narratedPricing.speeds[speed].multiplier;
-      const quantityMultiplier = narratedPricing.quantities[quantity].multiplier;
+      const speedData = narratedPricing.speeds[speed];
+      const quantityData = narratedPricing.quantities[quantity];
 
       if (!basePrice) {
-        return res.status(400).json({ message: "Invalid duration" });
+        return res.status(400).json({ message: `Invalid duration: ${duration}` });
       }
+      
+      if (!speedData) {
+        return res.status(400).json({ message: `Invalid speed: ${speed}` });
+      }
+      
+      if (!quantityData) {
+        return res.status(400).json({ message: `Invalid quantity: ${quantity}` });
+      }
+      
+      const speedMultiplier = speedData.multiplier || 1;
+      const quantityMultiplier = quantityData.multiplier || 1;
 
       // Calculate quality modifier
       let qualityMultiplier = 1.0;
@@ -238,7 +255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalUSD
       });
     } catch (error) {
-      res.status(500).json({ message: "Error calculating price" });
+      console.error("Error calculating price:", error);
+      console.error("Request body:", req.body);
+      res.status(500).json({ 
+        message: "Error calculating price",
+        error: error instanceof Error ? error.message : "Unknown error",
+        requestData: req.body
+      });
     }
   });
 

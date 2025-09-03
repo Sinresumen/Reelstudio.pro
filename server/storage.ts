@@ -63,7 +63,7 @@ export class MemStorage implements IStorage {
         speeds: {
           normal: { multiplier: 1.0, label: "Normal (2-5 días)" },
           fast: { multiplier: 1.2, label: "Rápido (2-3 días)" },
-          extreme: { multiplier: 1.5, label: "Extremo (1-2 días)" }
+          express: { multiplier: 1.5, label: "Express (1-2 días)" }
         },
         quantities: {
           15: { multiplier: 1.0, label: "15 videos" },
