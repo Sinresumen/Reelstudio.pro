@@ -117,10 +117,10 @@ export class DatabaseStorage implements IStorage {
 
   private getDefaultSiteContent(): SiteContent {
     return {
-      heroTitle: "Producción de Videos Profesionales",
-      heroDescription: "Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.",
+      heroTitle: "VideoVenta",
+      heroDescription: "Producción de videos profesionales para tu marca",
       contactEmail: "info@videoventa.com",
-      companyDescription: "Creamos contenido audiovisual profesional que impulsa tu marca y conecta con tu audiencia.",
+      companyDescription: "Producción de videos profesionales",
       logoUrl: "",
       calculatorTitle: "Calculadora de Precios",
       calculatorDescription: "Obtén una cotización instantánea personalizada para tu proyecto",
