@@ -117,20 +117,20 @@ export default function LandingPage() {
       </section>
 
       {/* Sample Videos Section - SECOND */}
-      <section id="videos" className="py-20 relative">
+      <section id="videos" className="py-12 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">
               <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
                 Nuestro Trabajo
               </span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               Ejemplos de producciones que hemos realizado
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6">
             {(config as any)?.sampleVideos?.map((video: any, index: number) => (
               <div
                 key={video.id || index}
@@ -171,11 +171,11 @@ export default function LandingPage() {
                     )}
                   </div>
 
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  <CardContent className="p-4">
+                    <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors">
                       {video.title}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {video.description}
                     </p>
                   </CardContent>
