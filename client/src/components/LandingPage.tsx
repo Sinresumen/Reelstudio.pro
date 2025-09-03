@@ -136,33 +136,6 @@ export default function LandingPage() {
               {(config as any)?.siteContent?.heroDescription || 'Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.'}
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <Button
-                onClick={() => scrollToSection('calculator')}
-                size="lg"
-                className="group relative overflow-hidden bg-gradient-to-r from-orange-500 to-red-600 text-white border-0 px-8 py-6 text-lg font-semibold shadow-2xl hover:shadow-red-500/25 transition-all duration-300 hover:scale-105"
-                data-testid="button-hero-calculate"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  Calcular Precio
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </Button>
-
-              <Button
-                onClick={handleWhatsAppContact}
-                size="lg"
-                variant="outline"
-                className="group border-2 border-primary/50 hover:border-primary px-8 py-6 text-lg font-semibold backdrop-blur-sm hover:scale-105 transition-all duration-300"
-                data-testid="button-hero-whatsapp"
-              >
-                <Phone className="mr-2 w-5 h-5 group-hover:rotate-12 transition-transform" />
-                Contactar Ahora
-              </Button>
-            </div>
-
             {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center gap-6 mt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
               {[
