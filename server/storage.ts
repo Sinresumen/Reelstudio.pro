@@ -1,4 +1,7 @@
 import { type Client, type InsertClient, type SiteConfig, type InsertSiteConfig, type Project, type InsertProject, type PricingConfig, type SampleVideo, type SiteContent } from "@shared/schema";
+import { clients, projects, siteConfig } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -29,27 +32,23 @@ export interface IStorage {
   createUser(user: any): Promise<any>;
 }
 
-export class MemStorage implements IStorage {
-  private clients: Map<string, Client>;
-  private projects: Map<string, Project>;
-  private siteConfig: SiteConfig | undefined;
-  private users: Map<string, any>;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.clients = new Map();
-    this.projects = new Map();
-    this.users = new Map();
-    
-    // Initialize with default configuration
-    this.siteConfig = {
-      id: randomUUID(),
-      whatsappNumber: "+52 55 1234 5678",
-      businessName: "VideoVenta",
-      pricing: this.getDefaultPricing(),
-      sampleVideos: this.getDefaultSampleVideos(),
-      siteContent: this.getDefaultSiteContent(),
-      updatedAt: new Date(),
-    };
+    // Initialize default config if it doesn't exist
+    this.initializeConfig();
+  }
+
+  private async initializeConfig() {
+    const config = await this.getSiteConfig();
+    if (!config) {
+      await this.createSiteConfig({
+        whatsappNumber: "+52 55 1234 5678",
+        businessName: "VideoVenta",
+        pricing: this.getDefaultPricing(),
+        sampleVideos: this.getDefaultSampleVideos(),
+        siteContent: this.getDefaultSiteContent(),
+      });
+    }
   }
 
   private getDefaultPricing(): PricingConfig {
@@ -78,7 +77,8 @@ export class MemStorage implements IStorage {
           "Calidad de imagen profesional",
           "Estilo de imágenes 2.5D",
           "Variedad de temas: Guerra, Peleas, Ángeles, Fantasía, Futurista, Histórico"
-        ]
+        ],
+        videoOptions: {}
       },
       singingPackages: {
         basic: { mxn: 1600, usd: 89, videos: 15, label: "Básico" },
@@ -131,125 +131,123 @@ export class MemStorage implements IStorage {
 
   // Client methods
   async getClients(): Promise<Client[]> {
-    return Array.from(this.clients.values());
+    const result = await db.select().from(clients);
+    return result;
   }
 
   async getClient(id: string): Promise<Client | undefined> {
-    return this.clients.get(id);
+    const [client] = await db.select().from(clients).where(eq(clients.id, id));
+    return client;
   }
 
   async getClientByUsername(username: string): Promise<Client | undefined> {
-    return Array.from(this.clients.values()).find(
-      (client) => client.username === username
-    );
+    const [client] = await db.select().from(clients).where(eq(clients.username, username));
+    return client;
   }
 
   async createClient(insertClient: InsertClient): Promise<Client> {
-    const id = randomUUID();
-    const client: Client = {
-      ...insertClient,
-      id,
-      createdAt: new Date(),
-    };
-    this.clients.set(id, client);
+    const [client] = await db.insert(clients).values(insertClient).returning();
     return client;
   }
 
   async updateClient(id: string, updates: Partial<Client>): Promise<Client | undefined> {
-    const client = this.clients.get(id);
-    if (!client) return undefined;
-    
-    const updatedClient = { ...client, ...updates };
-    this.clients.set(id, updatedClient);
-    return updatedClient;
+    const [updated] = await db
+      .update(clients)
+      .set(updates)
+      .where(eq(clients.id, id))
+      .returning();
+    return updated;
   }
 
   async deleteClient(id: string): Promise<boolean> {
-    return this.clients.delete(id);
+    const result = await db.delete(clients).where(eq(clients.id, id));
+    return true;
   }
 
   // Project methods
   async getProjects(): Promise<Project[]> {
-    return Array.from(this.projects.values());
+    const result = await db.select().from(projects);
+    return result;
   }
 
   async getProjectsByClientId(clientId: string): Promise<Project[]> {
-    return Array.from(this.projects.values()).filter(
-      (project) => project.clientId === clientId
-    );
+    const result = await db.select().from(projects).where(eq(projects.clientId, clientId));
+    return result;
   }
 
   async getProject(id: string): Promise<Project | undefined> {
-    return this.projects.get(id);
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
-    const id = randomUUID();
-    const project: Project = {
-      ...insertProject,
-      id,
-      createdAt: new Date(),
-    };
-    this.projects.set(id, project);
+    const [project] = await db.insert(projects).values(insertProject).returning();
     return project;
   }
 
   async updateProject(id: string, updates: Partial<Project>): Promise<Project | undefined> {
-    const project = this.projects.get(id);
-    if (!project) return undefined;
-    
-    const updatedProject = { ...project, ...updates };
-    this.projects.set(id, updatedProject);
-    return updatedProject;
+    const [updated] = await db
+      .update(projects)
+      .set(updates)
+      .where(eq(projects.id, id))
+      .returning();
+    return updated;
   }
 
   async deleteProject(id: string): Promise<boolean> {
-    return this.projects.delete(id);
+    const result = await db.delete(projects).where(eq(projects.id, id));
+    return true;
   }
 
   // Site config methods
   async getSiteConfig(): Promise<SiteConfig | undefined> {
-    return this.siteConfig;
+    const [config] = await db.select().from(siteConfig);
+    return config;
   }
 
-  async createSiteConfig(config: InsertSiteConfig): Promise<SiteConfig> {
-    const id = randomUUID();
-    this.siteConfig = {
-      ...config,
-      id,
-      updatedAt: new Date(),
-    };
-    return this.siteConfig;
+  async createSiteConfig(insertConfig: InsertSiteConfig): Promise<SiteConfig> {
+    const [config] = await db.insert(siteConfig).values(insertConfig).returning();
+    return config;
   }
 
   async updateSiteConfig(updates: Partial<SiteConfig>): Promise<SiteConfig | undefined> {
-    if (!this.siteConfig) return undefined;
+    const configs = await db.select().from(siteConfig);
+    if (configs.length === 0) {
+      // Create if doesn't exist
+      return this.createSiteConfig({
+        ...this.getDefaultSiteContent(),
+        whatsappNumber: updates.whatsappNumber || "+52 55 1234 5678",
+        businessName: updates.businessName || "VideoVenta",
+        pricing: updates.pricing || this.getDefaultPricing(),
+        sampleVideos: updates.sampleVideos || this.getDefaultSampleVideos(),
+        siteContent: updates.siteContent || this.getDefaultSiteContent(),
+        ...updates
+      } as InsertSiteConfig);
+    }
     
-    this.siteConfig = {
-      ...this.siteConfig,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    return this.siteConfig;
+    const [updated] = await db
+      .update(siteConfig)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(siteConfig.id, configs[0].id))
+      .returning();
+    return updated;
   }
 
   // User methods (keep for compatibility)
   async getUser(id: string): Promise<any> {
-    return this.users.get(id);
+    // For now, return null as we don't have users table
+    return null;
   }
 
   async getUserByUsername(username: string): Promise<any> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
+    // For now, return null as we don't have users table
+    return null;
   }
 
   async createUser(user: any): Promise<any> {
-    const id = randomUUID();
-    const newUser = { ...user, id };
-    this.users.set(id, newUser);
-    return newUser;
+    // For now, return the user as-is
+    return user;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
