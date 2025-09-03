@@ -7,6 +7,8 @@ import PriceCalculator from './PriceCalculator';
 
 export default function LandingPage() {
   const { config } = useConfig();
+  const [logoClicks, setLogoClicks] = React.useState(0);
+  const logoClickTimer = React.useRef<NodeJS.Timeout | null>(null);
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -20,10 +22,70 @@ export default function LandingPage() {
     }
   };
 
+  const handleLogoClick = () => {
+    // Incrementar contador de clicks
+    setLogoClicks(prev => prev + 1);
+    
+    // Limpiar timer anterior
+    if (logoClickTimer.current) {
+      clearTimeout(logoClickTimer.current);
+    }
+    
+    // Si llegamos a 5 clicks, ir al admin
+    if (logoClicks + 1 >= 5) {
+      window.location.href = '/admin';
+      setLogoClicks(0);
+    } else {
+      // Resetear contador después de 2 segundos sin clicks
+      logoClickTimer.current = setTimeout(() => {
+        setLogoClicks(0);
+      }, 2000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Header con Logo clickeable para Admin */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <button 
+              onClick={handleLogoClick}
+              className="text-2xl font-bold fire-text cursor-pointer select-none"
+              data-testid="logo-admin-access"
+            >
+              {(config as any)?.businessName || 'VideoVenta'}
+            </button>
+            <nav className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection('videos')}
+              >
+                Videos
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollToSection('calculator')}
+              >
+                Cotizar
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleWhatsAppContact}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+              >
+                <Phone className="w-4 h-4 mr-1" />
+                WhatsApp
+              </Button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section with Animated Background */}
-      <section className="relative min-h-[90vh] flex items-center justify-center">
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-16">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 via-red-900/10 to-background"></div>
         
@@ -126,7 +188,7 @@ export default function LandingPage() {
       </section>
 
       {/* Sample Videos Section */}
-      <section className="py-20 relative">
+      <section id="videos" className="py-20 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
