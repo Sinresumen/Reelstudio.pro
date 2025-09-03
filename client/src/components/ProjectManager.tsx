@@ -122,8 +122,7 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
       name: formData.get('name'),
       type: formData.get('type'),
       status: formData.get('status'),
-      duration: formData.get('duration'),
-      deliveryDate: formData.get('deliveryDate'),
+      deliveryDate: new Date(), // Fecha automática
     };
     createProjectMutation.mutate(project);
   };
@@ -134,8 +133,6 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
       name: formData.get('name'),
       type: formData.get('type'),
       status: formData.get('status'),
-      duration: formData.get('duration'),
-      deliveryDate: formData.get('deliveryDate'),
     });
   };
 
@@ -224,36 +221,23 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                     </Select>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="project-status">Estado</Label>
-                    <Select name="status" defaultValue="pending">
-                      <SelectTrigger id="project-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pendiente</SelectItem>
-                        <SelectItem value="in_progress">En Progreso</SelectItem>
-                        <SelectItem value="completed">Completado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="project-duration">Duración</Label>
-                    <Input
-                      id="project-duration"
-                      name="duration"
-                      placeholder="2:30 min"
-                    />
-                  </div>
-                </div>
                 <div>
-                  <Label htmlFor="project-delivery">Fecha de Entrega</Label>
-                  <Input
-                    id="project-delivery"
-                    name="deliveryDate"
-                    type="date"
-                  />
+                  <Label htmlFor="project-status">Estado</Label>
+                  <Select name="status" defaultValue="pending">
+                    <SelectTrigger id="project-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pendiente</SelectItem>
+                      <SelectItem value="in_progress">En Progreso</SelectItem>
+                      <SelectItem value="completed">Completado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="bg-muted/50 p-3 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    🔗 Los enlaces de descarga se agregan después de crear el proyecto con el botón de cadena
+                  </p>
                 </div>
                 <div className="flex space-x-4">
                   <Button type="button" variant="outline" onClick={() => setShowAddProject(false)} className="flex-1">
@@ -315,6 +299,8 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                           setShowManageLinks(true);
                         }}
                         data-testid={`button-manage-links-${project.id}`}
+                        title="Agregar/Ver enlaces de descarga"
+                        className="text-blue-500 hover:text-blue-600"
                       >
                         <Link size={16} />
                       </Button>
@@ -326,6 +312,7 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                           setShowEditProject(true);
                         }}
                         data-testid={`button-edit-project-${project.id}`}
+                        title="Editar proyecto"
                       >
                         <Edit size={16} />
                       </Button>
@@ -388,38 +375,18 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
                     </Select>
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="edit-project-status">Estado</Label>
-                    <Select name="status" defaultValue={editingProject.status}>
-                      <SelectTrigger id="edit-project-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pendiente</SelectItem>
-                        <SelectItem value="in_progress">En Progreso</SelectItem>
-                        <SelectItem value="completed">Completado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-project-duration">Duración</Label>
-                    <Input
-                      id="edit-project-duration"
-                      name="duration"
-                      defaultValue={editingProject.duration}
-                      placeholder="2:30 min"
-                    />
-                  </div>
-                </div>
                 <div>
-                  <Label htmlFor="edit-project-delivery">Fecha de Entrega</Label>
-                  <Input
-                    id="edit-project-delivery"
-                    name="deliveryDate"
-                    type="date"
-                    defaultValue={editingProject.deliveryDate ? new Date(editingProject.deliveryDate).toISOString().split('T')[0] : ''}
-                  />
+                  <Label htmlFor="edit-project-status">Estado</Label>
+                  <Select name="status" defaultValue={editingProject.status}>
+                    <SelectTrigger id="edit-project-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pendiente</SelectItem>
+                      <SelectItem value="in_progress">En Progreso</SelectItem>
+                      <SelectItem value="completed">Completado</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex space-x-4">
                   <Button type="button" variant="outline" onClick={() => {
