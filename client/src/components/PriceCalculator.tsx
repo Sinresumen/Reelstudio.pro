@@ -45,7 +45,7 @@ export default function PriceCalculator() {
   }, [duration, speed, quantity, videoOptions, activeTab]);
 
   const pricing = config?.pricing as any;
-  const narratedPricing = pricing?.narratedVideos;
+  const narratedPricing = pricing?.narratedVideos || pricing; // Fallback for old structure
   const singingPackages = pricing?.singingPackages || {};
 
   const handleWhatsAppQuote = () => {

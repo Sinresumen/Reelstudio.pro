@@ -32,6 +32,13 @@ export default function LandingPage() {
     }
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // Helper functions to safely access nested properties
   const getSiteContent = (key: string) => {
     return config?.siteContent && typeof config.siteContent === 'object' && key in config.siteContent
@@ -105,12 +112,21 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={handleWhatsAppContact}
+                onClick={() => scrollToSection('calculator')} 
                 className="fire-gradient text-white px-8 py-4 text-lg font-semibold hover:opacity-90 fire-shadow animate-glow-pulse"
+                data-testid="button-calculate-price"
+              >
+                <span className="mr-2">🧮</span>
+                Calcular Precio
+              </Button>
+              <Button 
+                onClick={handleWhatsAppContact}
+                variant="outline"
+                className="border-2 border-primary text-primary px-8 py-4 text-lg font-semibold hover:bg-primary hover:text-white transition-all"
                 data-testid="button-whatsapp-contact"
               >
                 <Phone className="mr-2" size={20} />
-                {config?.whatsappNumber || '+52 55 1234 5678'}
+                Contactar
               </Button>
             </div>
           </div>
