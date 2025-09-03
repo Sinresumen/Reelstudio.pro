@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useConfig } from '@/contexts/ConfigContext';
-import { Phone, Play, Sparkles, Star, Trophy, Zap, ArrowRight } from 'lucide-react';
+import { Phone, Play, Sparkles, ArrowRight } from 'lucide-react';
 import PriceCalculator from './PriceCalculator';
 import { useLocation } from 'wouter';
 
