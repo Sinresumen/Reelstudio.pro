@@ -157,20 +157,6 @@ export default function LandingPage() {
             <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
               {(config as any)?.siteContent?.heroDescription || 'Producción de videos profesionales para tu marca'}
             </p>
-
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              {[
-                { icon: Trophy, text: "100+ Proyectos" },
-                { icon: Star, text: "5.0 Calificación" },
-                { icon: Zap, text: "Entrega Rápida" }
-              ].map((item, index) => (
-                <div key={index} className="flex items-center gap-2 text-muted-foreground">
-                  <item.icon className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-medium">{item.text}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -267,7 +253,7 @@ export default function LandingPage() {
             )}
             <div className="mt-6">
               <p className="text-sm text-muted-foreground/60">
-                © 2024 {config?.businessName || 'VideoVenta'}. Todos los derechos reservados.
+                © 2025 Reelstudio.pro. Todos los derechos reservados.
               </p>
             </div>
           </div>
