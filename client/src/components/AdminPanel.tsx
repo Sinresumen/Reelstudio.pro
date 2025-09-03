@@ -483,6 +483,14 @@ export default function AdminPanel() {
             data-testid="textarea-hero-description"
           />
         </div>
+        <Button 
+          onClick={handleSiteContentUpdate}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-update-hero"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Sección Hero'}
+        </Button>
       </Card>
 
       <Card className="glass-card fire-border p-6">
@@ -507,6 +515,14 @@ export default function AdminPanel() {
             data-testid="textarea-calculator-description"
           />
         </div>
+        <Button 
+          onClick={handleSiteContentUpdate}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-update-calculator"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Calculadora'}
+        </Button>
       </Card>
 
       <Card className="glass-card fire-border p-6">
@@ -531,6 +547,14 @@ export default function AdminPanel() {
             data-testid="textarea-company-description"
           />
         </div>
+        <Button 
+          onClick={handleSiteContentUpdate}
+          className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
+          disabled={updateConfigMutation.isPending}
+          data-testid="button-update-contact"
+        >
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Información'}
+        </Button>
       </Card>
 
       <Card className="glass-card fire-border p-6">
@@ -574,9 +598,9 @@ export default function AdminPanel() {
           onClick={handleSiteContentUpdate}
           className="fire-gradient text-white font-semibold hover:opacity-90 mt-4"
           disabled={updateConfigMutation.isPending}
-          data-testid="button-update-content"
+          data-testid="button-update-trust"
         >
-          {updateConfigMutation.isPending ? 'Guardando...' : 'Actualizar Contenido'}
+          {updateConfigMutation.isPending ? 'Guardando...' : 'Guardar Indicadores'}
         </Button>
       </Card>
 
