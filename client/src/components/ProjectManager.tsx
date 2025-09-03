@@ -59,10 +59,12 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
         description: "El proyecto se ha creado exitosamente",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Error creating project:', error);
+      const message = error?.message || "No se pudo crear el proyecto";
       toast({
         title: "Error",
-        description: "No se pudo crear el proyecto",
+        description: message,
         variant: "destructive",
       });
     },
@@ -119,10 +121,10 @@ export default function ProjectManager({ clientId, clientName }: ProjectManagerP
   const handleCreateProject = (formData: FormData) => {
     const project = {
       clientId,
-      name: formData.get('name'),
-      type: formData.get('type'),
-      status: formData.get('status'),
-      deliveryDate: new Date(), // Fecha automática
+      name: formData.get('name') as string,
+      type: formData.get('type') as string,
+      status: formData.get('status') as string,
+      deliveryDate: new Date().toISOString(),
     };
     createProjectMutation.mutate(project);
   };
