@@ -77,6 +77,15 @@ export default function LandingPage() {
                 Cotizar
               </Button>
               <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="text-orange-500 hover:text-orange-600"
+                data-testid="button-admin-access"
+              >
+                Admin
+              </Button>
+              <Button
                 size="sm"
                 onClick={handleWhatsAppContact}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"

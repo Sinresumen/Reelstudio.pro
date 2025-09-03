@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,12 +8,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Plus, Edit, Trash2, Users, Video, DollarSign, Settings } from 'lucide-react';
+import { Eye, Plus, Edit, Trash2, Users, Video, DollarSign, Settings, LogOut, Package } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { ClientWithProjects } from '@shared/schema';
+import AdminLogin from './AdminLogin';
+import ProjectManager from './ProjectManager';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminPanel() {
   const [, setLocation] = useLocation();
@@ -21,6 +24,49 @@ export default function AdminPanel() {
   const [showAddClient, setShowAddClient] = React.useState(false);
   const [showEditClient, setShowEditClient] = React.useState(false);
   const [editingClient, setEditingClient] = React.useState<any>(null);
+  const [selectedClientForProjects, setSelectedClientForProjects] = React.useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const { toast } = useToast();
+
+  // Check authentication status
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/admin/check-auth', {
+        credentials: 'include',
+      });
+      const data = await response.json();
+      setIsAuthenticated(data.isAuthenticated);
+    } catch (error) {
+      setIsAuthenticated(false);
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setIsAuthenticated(false);
+      toast({
+        title: "Sesión Cerrada",
+        description: "Ha cerrado sesión exitosamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar sesión",
+        variant: "destructive",
+      });
+    }
+  };
   
   const { data: clients = [] } = useQuery({
     queryKey: ['/api/clients'],
@@ -777,18 +823,35 @@ export default function AdminPanel() {
                         variant="ghost" 
                         onClick={() => setLocation(`/client/${client.username}`)}
                         data-testid={`button-view-client-${client.id}`}
+                        title="Ver página del cliente"
                       >
                         <Eye size={16} />
                       </Button>
                       <Button 
                         size="icon" 
                         variant="ghost" 
+                        onClick={() => setSelectedClientForProjects(client)}
+                        data-testid={`button-projects-client-${client.id}`}
+                        title="Gestionar proyectos"
+                      >
+                        <Package size={16} />
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
                         onClick={() => handleEditClient(client)}
                         data-testid={`button-edit-client-${client.id}`}
+                        title="Editar cliente"
                       >
                         <Edit size={16} />
                       </Button>
-                      <Button size="icon" variant="ghost" className="text-destructive" data-testid={`button-delete-client-${client.id}`}>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="text-destructive" 
+                        data-testid={`button-delete-client-${client.id}`}
+                        title="Eliminar cliente"
+                      >
                         <Trash2 size={16} />
                       </Button>
                     </div>
@@ -799,6 +862,26 @@ export default function AdminPanel() {
           </Table>
         </div>
       </Card>
+
+      {/* Project Manager Section */}
+      {selectedClientForProjects && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold fire-text">Gestión de Proyectos</h3>
+            <Button
+              variant="outline"
+              onClick={() => setSelectedClientForProjects(null)}
+              data-testid="button-close-projects"
+            >
+              Cerrar
+            </Button>
+          </div>
+          <ProjectManager
+            clientId={selectedClientForProjects.id}
+            clientName={selectedClientForProjects.name}
+          />
+        </div>
+      )}
     </div>
   );
 
@@ -971,6 +1054,22 @@ export default function AdminPanel() {
     );
   };
 
+  // Show login screen if not authenticated
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={() => {
+      setIsAuthenticated(true);
+      checkAuthStatus();
+    }} />;
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Admin Header */}
@@ -986,6 +1085,15 @@ export default function AdminPanel() {
                 data-testid="button-back-to-site"
               >
                 Volver al Sitio
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                data-testid="button-logout"
+              >
+                <LogOut size={16} className="mr-2" />
+                Cerrar Sesión
               </Button>
             </div>
           </div>

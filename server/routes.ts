@@ -1,23 +1,72 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import { storage } from "./storage";
 import { insertClientSchema, insertProjectSchema, insertSiteConfigSchema } from "@shared/schema";
 import { z } from "zod";
 
+// Extend Request type to include session
+interface AuthRequest extends Request {
+  session: any;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Admin authentication
-  app.post("/api/admin/login", async (req, res) => {
+  // Session configuration
+  const PgSession = connectPgSimple(session);
+  app.use(
+    session({
+      store: new PgSession({
+        conString: process.env.DATABASE_URL,
+        createTableIfMissing: true,
+        tableName: 'admin_sessions',
+      }),
+      secret: process.env.SESSION_SECRET || 'videoventa-secret-key-change-in-production',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      },
+    })
+  );
+
+  // Authentication middleware
+  const requireAuth = (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    next();
+  };
+
+  // Admin authentication routes
+  app.post("/api/admin/login", async (req: AuthRequest, res) => {
     const { password } = req.body;
     
-    // Simple password check - in production use proper auth
-    if (password === "admin123") {
+    // Check password
+    if (password === "Lothborja1") {
+      req.session.isAuthenticated = true;
       res.json({ success: true, message: "Authentication successful" });
     } else {
       res.status(401).json({ success: false, message: "Invalid password" });
     }
   });
 
-  // Site configuration routes
+  app.post("/api/admin/logout", (req: AuthRequest, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ error: 'Could not log out' });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.get("/api/admin/check-auth", (req: AuthRequest, res) => {
+    res.json({ isAuthenticated: !!req.session?.isAuthenticated });
+  });
+
+  // Site configuration routes - config GET is public for calculator
   app.get("/api/config", async (req, res) => {
     try {
       const config = await storage.getSiteConfig();
@@ -27,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/config", async (req, res) => {
+  app.put("/api/config", requireAuth as any, async (req, res) => {
     try {
       const updates = req.body;
       const updatedConfig = await storage.updateSiteConfig(updates);
@@ -37,8 +86,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Client routes
-  app.get("/api/clients", async (req, res) => {
+  // Client routes - protected for admin
+  app.get("/api/clients", requireAuth as any, async (req, res) => {
     try {
       const clients = await storage.getClients();
       res.json(clients);
@@ -71,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/clients", async (req, res) => {
+  app.post("/api/clients", requireAuth as any, async (req, res) => {
     try {
       const validatedData = insertClientSchema.parse(req.body);
       const client = await storage.createClient(validatedData);
@@ -84,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/clients/:id", async (req, res) => {
+  app.put("/api/clients/:id", requireAuth as any, async (req, res) => {
     try {
       const updates = req.body;
       const client = await storage.updateClient(req.params.id, updates);
@@ -97,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/clients/:id", async (req, res) => {
+  app.delete("/api/clients/:id", requireAuth as any, async (req, res) => {
     try {
       const deleted = await storage.deleteClient(req.params.id);
       if (!deleted) {
@@ -109,8 +158,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Project routes
-  app.get("/api/projects", async (req, res) => {
+  // Project routes - protected for admin
+  app.get("/api/projects", requireAuth as any, async (req, res) => {
     try {
       const projects = await storage.getProjects();
       res.json(projects);
@@ -140,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", requireAuth as any, async (req, res) => {
     try {
       const validatedData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validatedData);
@@ -153,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/projects/:id", async (req, res) => {
+  app.put("/api/projects/:id", requireAuth as any, async (req, res) => {
     try {
       const updates = req.body;
       const project = await storage.updateProject(req.params.id, updates);
@@ -166,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projects/:id", async (req, res) => {
+  app.delete("/api/projects/:id", requireAuth as any, async (req, res) => {
     try {
       const deleted = await storage.deleteProject(req.params.id);
       if (!deleted) {
