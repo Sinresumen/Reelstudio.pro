@@ -116,59 +116,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Hero Section with Animated Background */}
-      <section className="relative min-h-[90vh] flex items-center justify-center">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 via-red-900/10 to-background"></div>
-        
-        {/* Pattern overlay */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px)`,
-          }}></div>
-        </div>
-
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${15 + Math.random() * 10}s`,
-              }}
-            >
-              <div className="w-1 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full opacity-60"></div>
-            </div>
-          ))}
-        </div>
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-5xl mx-auto animate-fade-in-up">
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-              <span className="inline-block animate-text-gradient bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent animate-gradient" style={{ backgroundSize: '300%' }}>
-                {(config as any)?.siteContent?.heroTitle || 'VideoVenta'}
-              </span>
-            </h1>
-
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              {(config as any)?.siteContent?.heroDescription || 'Producción de videos profesionales para tu marca'}
-            </p>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-scroll-down"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sample Videos Section */}
+      {/* Sample Videos Section - SECOND */}
       <section id="videos" className="py-20 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -234,6 +182,58 @@ export default function LandingPage() {
                 </Card>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Hero Section with Animated Background - THIRD */}
+      <section className="relative min-h-[90vh] flex items-center justify-center">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 via-red-900/10 to-background"></div>
+        
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px)`,
+          }}></div>
+        </div>
+
+        {/* Floating particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${15 + Math.random() * 10}s`,
+              }}
+            >
+              <div className="w-1 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full opacity-60"></div>
+            </div>
+          ))}
+        </div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-5xl mx-auto animate-fade-in-up">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+              <span className="inline-block animate-text-gradient bg-gradient-to-r from-orange-400 via-red-500 to-orange-400 bg-clip-text text-transparent animate-gradient" style={{ backgroundSize: '300%' }}>
+                {(config as any)?.siteContent?.heroTitle || 'VideoVenta'}
+              </span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              {(config as any)?.siteContent?.heroDescription || 'Producción de videos profesionales para tu marca'}
+            </p>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-scroll-down"></div>
           </div>
         </div>
       </section>
