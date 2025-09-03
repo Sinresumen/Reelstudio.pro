@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useConfig } from '@/contexts/ConfigContext';
-import { Phone, Play, Sparkles, ArrowRight } from 'lucide-react';
+import { Phone, Play, Sparkles, ArrowRight, Trophy, Star, Zap } from 'lucide-react';
 import PriceCalculator from './PriceCalculator';
 import { useLocation } from 'wouter';
 
@@ -238,6 +238,25 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Indicadores al final */}
+      <section className="py-12 bg-background/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Trophy className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">100+ Proyectos</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Star className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">5.0 Calificación</span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Zap className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">Entrega Rápida</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="py-12 border-t border-border/50 bg-gradient-to-b from-background to-background/50">
