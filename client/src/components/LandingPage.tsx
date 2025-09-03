@@ -1,46 +1,51 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, Play, Sparkles, Zap, Trophy, Star, ArrowRight, CheckCircle } from 'lucide-react';
 import { useConfig } from '@/contexts/ConfigContext';
+import { Phone, Play, Sparkles, Star, Trophy, Zap, ArrowRight } from 'lucide-react';
 import PriceCalculator from './PriceCalculator';
+import { useLocation } from 'wouter';
 
 export default function LandingPage() {
   const { config } = useConfig();
-  const [logoClicks, setLogoClicks] = React.useState(0);
-  const logoClickTimer = React.useRef<NodeJS.Timeout | null>(null);
+  const [, navigate] = useLocation();
+  const [logoClickCount, setLogoClickCount] = React.useState(0);
+  const [showAdminHint, setShowAdminHint] = React.useState(false);
 
   const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleWhatsAppContact = () => {
     if (config?.whatsappNumber) {
-      const message = `Hola, me interesa conocer más sobre sus servicios de video profesional.`;
+      const message = "Hola, me interesa obtener más información sobre los servicios de producción de videos.";
       const whatsappUrl = `https://api.whatsapp.com/send?phone=${config.whatsappNumber.replace(/\s+/g, '')}&text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
   };
 
   const handleLogoClick = () => {
-    // Incrementar contador de clicks
-    setLogoClicks(prev => prev + 1);
+    const newCount = logoClickCount + 1;
+    setLogoClickCount(newCount);
     
-    // Limpiar timer anterior
-    if (logoClickTimer.current) {
-      clearTimeout(logoClickTimer.current);
+    if (newCount === 5) {
+      // Navigate to admin panel after 5 clicks
+      navigate('/admin');
+      setLogoClickCount(0);
+    } else if (newCount >= 3) {
+      // Show hint after 3 clicks
+      setShowAdminHint(true);
+      setTimeout(() => setShowAdminHint(false), 2000);
     }
     
-    // Si llegamos a 5 clicks, ir al admin
-    if (logoClicks + 1 >= 5) {
-      window.location.href = '/admin';
-      setLogoClicks(0);
-    } else {
-      // Resetear contador después de 2 segundos sin clicks
-      logoClickTimer.current = setTimeout(() => {
-        setLogoClicks(0);
-      }, 2000);
-    }
+    // Reset counter after 3 seconds of no clicks
+    setTimeout(() => {
+      setLogoClickCount(0);
+      setShowAdminHint(false);
+    }, 2000);
   };
 
   return (
@@ -84,8 +89,35 @@ export default function LandingPage() {
         </div>
       </header>
 
+      {/* Price Calculator Section - FIRST */}
+      <section id="calculator" className="py-20 relative pt-24">
+        <div className="absolute inset-0 bg-gradient-to-b from-orange-900/5 to-red-900/5"></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-primary/20 mb-6">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Cotización Instantánea</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                {(config as any)?.siteContent?.calculatorTitle || 'Calcula tu Inversión'}
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {(config as any)?.siteContent?.calculatorDescription || 'Obtén un presupuesto instantáneo y transparente para tu proyecto de video'}
+            </p>
+          </div>
+
+          <div className="max-w-6xl mx-auto">
+            <Card className="p-8 bg-card/80 backdrop-blur-sm border-primary/20 shadow-2xl">
+              <PriceCalculator />
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Hero Section with Animated Background */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-16">
+      <section className="relative min-h-[90vh] flex items-center justify-center">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 via-red-900/10 to-background"></div>
         
@@ -282,33 +314,6 @@ export default function LandingPage() {
                 </Card>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Calculator Section */}
-      <section id="calculator" className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-orange-900/5 to-red-900/5"></div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-primary/20 mb-6">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Cotización Instantánea</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                {(config as any)?.siteContent?.calculatorTitle || 'Calcula tu Inversión'}
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {(config as any)?.siteContent?.calculatorDescription || 'Obtén un presupuesto instantáneo y transparente para tu proyecto de video'}
-            </p>
-          </div>
-
-          <div className="max-w-6xl mx-auto">
-            <Card className="p-8 bg-card/80 backdrop-blur-sm border-primary/20 shadow-2xl">
-              <PriceCalculator />
-            </Card>
           </div>
         </div>
       </section>
