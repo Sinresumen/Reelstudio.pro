@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoVenta System - Plataforma de Producción de Videos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                    chart: {
+                        "1": "var(--chart-1)",
+                        "2": "var(--chart-2)",
+                        "3": "var(--chart-3)",
+                        "4": "var(--chart-4)",
+                        "5": "var(--chart-5)",
+                    }
+                },
+                fontFamily: {
+                    sans: ["var(--font-sans)"],
+                    serif: ["var(--font-serif)"],
+                    mono: ["var(--font-mono)"],
+                },
+                animation: {
+                    'fire-flicker': 'fire-flicker 2s ease-in-out infinite alternate',
+                    'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
+                    'float': 'float 6s ease-in-out infinite',
+                },
+                keyframes: {
+                    'fire-flicker': {
+                        '0%': { opacity: '0.9', transform: 'scale(1) rotate(0deg)' },
+                        '100%': { opacity: '1', transform: 'scale(1.05) rotate(1deg)' }
+                    },
+                    'glow-pulse': {
+                        '0%, 100%': { boxShadow: '0 0 20px rgba(255, 69, 0, 0.5)' },
+                        '50%': { boxShadow: '0 0 40px rgba(255, 140, 0, 0.8)' }
+                    },
+                    'float': {
+                        '0%, 100%': { transform: 'translateY(0px)' },
+                        '50%': { transform: 'translateY(-10px)' }
+                    }
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(0 0% 8%);
+            --foreground: hsl(0 0% 95%);
+            --card: hsl(0 0% 12%);
+            --card-foreground: hsl(0 0% 95%);
+            --popover: hsl(0 0% 12%);
+            --popover-foreground: hsl(0 0% 95%);
+            --primary: hsl(16 100% 50%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(39 100% 50%);
+            --secondary-foreground: hsl(0 0% 12%);
+            --muted: hsl(0 0% 20%);
+            --muted-foreground: hsl(0 0% 70%);
+            --accent: hsl(25 100% 60%);
+            --accent-foreground: hsl(0 0% 12%);
+            --destructive: hsl(0 85% 60%);
+            --destructive-foreground: hsl(0 0% 100%);
+            --border: hsl(0 0% 25%);
+            --input: hsl(0 0% 18%);
+            --ring: hsl(16 100% 50%);
+            --radius: 0.75rem;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+
+        .fire-gradient {
+            background: linear-gradient(135deg, #FF4500 0%, #FF6B00 50%, #FFB800 100%);
+        }
+
+        .fire-text {
+            background: linear-gradient(135deg, #FF4500 0%, #FF6B00 50%, #FFB800 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-card {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+        }
+
+        .fire-shadow {
+            box-shadow: 0 10px 30px rgba(255, 69, 0, 0.3);
+        }
+
+        .fire-border {
+            border: 2px solid transparent;
+            background: linear-gradient(rgba(30, 30, 30, 0.9), rgba(30, 30, 30, 0.9)) padding-box,
+                        linear-gradient(135deg, #FF4500, #FF6B00, #FFB800) border-box;
+        }
+
+        .fire-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .fire-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #FFB800 0%, #FF6B00 70%, transparent 100%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <div class="fire-particles">
+        <div class="fire-particle" style="left: 10%; animation-delay: 0s; animation-duration: 4s;"></div>
+        <div class="fire-particle" style="left: 20%; animation-delay: 1s; animation-duration: 5s;"></div>
+        <div class="fire-particle" style="left: 30%; animation-delay: 2s; animation-duration: 6s;"></div>
+        <div class="fire-particle" style="left: 70%; animation-delay: 3s; animation-duration: 4.5s;"></div>
+        <div class="fire-particle" style="left: 80%; animation-delay: 4s; animation-duration: 5.5s;"></div>
+        <div class="fire-particle" style="left: 90%; animation-delay: 5s; animation-duration: 4.2s;"></div>
+    </div>
+
+    <!-- @COMPONENT: AppRouter [handles navigation between pages] -->
+    <div id="app-container">
+        <!-- @COMPONENT: Header [main navigation] -->
+        <header class="sticky top-0 z-50 glass-card">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-4">
+                        <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold fire-text">VideoVenta</span>
+                    </div>
+                    <nav class="hidden md:flex items-center space-x-8">
+                        <a href="#home" class="nav-link text-muted-foreground hover:text-primary transition-colors">Inicio</a>
+                        <a href="#services" class="nav-link text-muted-foreground hover:text-primary transition-colors">Servicios</a>
+                        <a href="#calculator" class="nav-link text-muted-foreground hover:text-primary transition-colors">Calculadora</a>
+                        <a href="#contact" class="nav-link text-muted-foreground hover:text-primary transition-colors">Contacto</a>
+                        <button id="admin-btn" class="fire-gradient text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Admin
+                        </button>
+                    </nav>
+                    <button class="md:hidden fire-gradient text-white p-2 rounded-lg">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <!-- @STATE: currentPage:string = 'home' -->
+        <main id="main-content">
+            <!-- @COMPONENT: LandingPage [main user interface] -->
+            <div id="landing-page" class="page-content">
+                <!-- Hero Section -->
+                <section id="home" class="relative overflow-hidden">
+                    <!-- Dynamic fire background -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-red-900/20 via-orange-900/20 to-yellow-900/20"></div>
+                    <!-- Professional video production studio background -->
+                    <div class="absolute inset-0 opacity-30" style="background-image: url('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080'); background-size: cover; background-position: center;"></div>
+                    
+                    <div class="relative container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+                        <div class="text-center">
+                            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 animate-fire-flicker">
+                                <span class="fire-text">Producción de Videos</span>
+                                <br />
+                                <span class="text-white">Profesionales</span>
+                            </h1>
+                            <p class="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto">
+                                Creamos contenido audiovisual de alta calidad que impulsa tu marca. 
+                                Desde videos corporativos hasta campañas promocionales completas.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button class="fire-gradient text-white px-8 py-4 rounded-lg text-lg font-semibold hover:opacity-90 transition-all fire-shadow animate-glow-pulse">
+                                    <i class="fas fa-calculator mr-2"></i>
+                                    Calcular Precio
+                                </button>
+                                <button id="whatsapp-contact" class="border-2 border-primary text-primary px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary hover:text-white transition-all">
+                                    <i class="fab fa-whatsapp mr-2"></i>
+                                    <span id="whatsapp-number" data-bind="config.whatsappNumber">+52 55 1234 5678</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sample Videos Section -->
+                <section id="services" class="py-20 bg-card/50">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                                <span class="fire-text">Videos de Muestra</span>
+                            </h2>
+                            <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+                                Explora nuestros diferentes estilos y especialidades en producción audiovisual
+                            </p>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <!-- @MAP: sampleVideos.map(video => ( -->
+                            <div class="glass-card rounded-xl overflow-hidden fire-border hover:scale-105 transition-transform">
+                                <div class="aspect-video bg-gradient-to-br from-red-900/50 to-orange-900/50 relative">
+                                    <!-- Modern video equipment professional -->
+                                    <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200" alt="Video Corporativo" class="w-full h-full object-cover" data-mock="true" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div class="absolute bottom-4 left-4 right-4">
+                                        <h3 class="text-lg font-semibold text-white mb-2" data-bind="video.title">Video Corporativo</h3>
+                                        <p class="text-sm text-gray-300" data-bind="video.description">Presentaciones empresariales profesionales</p>
+                                    </div>
+                                    <button class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fire-gradient w-16 h-16 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition-transform">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="glass-card rounded-xl overflow-hidden fire-border hover:scale-105 transition-transform">
+                                <div class="aspect-video bg-gradient-to-br from-orange-900/50 to-yellow-900/50 relative">
+                                    <!-- Professional video production studio -->
+                                    <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200" alt="Video Promocional" class="w-full h-full object-cover" data-mock="true" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div class="absolute bottom-4 left-4 right-4">
+                                        <h3 class="text-lg font-semibold text-white mb-2" data-bind="video.title">Video Promocional</h3>
+                                        <p class="text-sm text-gray-300" data-bind="video.description">Campañas publicitarias impactantes</p>
+                                    </div>
+                                    <button class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fire-gradient w-16 h-16 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition-transform">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="glass-card rounded-xl overflow-hidden fire-border hover:scale-105 transition-transform">
+                                <div class="aspect-video bg-gradient-to-br from-yellow-900/50 to-red-900/50 relative">
+                                    <!-- Video equipment professional setup -->
+                                    <img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200" alt="Video Explicativo" class="w-full h-full object-cover" data-mock="true" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div class="absolute bottom-4 left-4 right-4">
+                                        <h3 class="text-lg font-semibold text-white mb-2" data-bind="video.title">Video Explicativo</h3>
+                                        <p class="text-sm text-gray-300" data-bind="video.description">Tutoriales y contenido educativo</p>
+                                    </div>
+                                    <button class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 fire-gradient w-16 h-16 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition-transform">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Price Calculator Section -->
+                <section id="calculator" class="py-20 relative">
+                    <!-- Fire theme background -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-orange-900/10 via-red-900/10 to-yellow-900/10"></div>
+                    
+                    <div class="relative container mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                                <span class="fire-text">Calculadora de Precios</span>
+                            </h2>
+                            <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+                                Obtén una cotización instantánea personalizada para tu proyecto
+                            </p>
+                        </div>
+
+                        <div class="max-w-4xl mx-auto">
+                            <div class="glass-card rounded-xl p-8 fire-border">
+                                <!-- @COMPONENT: PriceCalculator [interactive pricing tool] -->
+                                <div class="grid lg:grid-cols-2 gap-8">
+                                    <div class="space-y-6">
+                                        <div>
+                                            <label class="block text-sm font-medium mb-3 fire-text">Duración del Video</label>
+                                            <div class="grid grid-cols-1 gap-3">
+                                                <label class="flex items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                                    <input type="radio" name="duration" value="5-10" class="mr-3 text-primary" checked data-price-mxn="1600" data-price-usd="89">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium">5-10 minutos</div>
+                                                        <div class="text-sm text-muted-foreground">Ideal para presentaciones</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$1,600 MXN</div>
+                                                </label>
+                                                <label class="flex items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                                    <input type="radio" name="duration" value="10-20" class="mr-3 text-primary" data-price-mxn="2600" data-price-usd="144">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium">10-20 minutos</div>
+                                                        <div class="text-sm text-muted-foreground">Perfecto para promocionales</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$2,600 MXN</div>
+                                                </label>
+                                                <label class="flex items-center p-4 border border-border rounded-lg cursor-pointer hover:border-primary transition-colors">
+                                                    <input type="radio" name="duration" value="20-30" class="mr-3 text-primary" data-price-mxn="3500" data-price-usd="194">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium">20-30 minutos</div>
+                                                        <div class="text-sm text-muted-foreground">Documentales y tutoriales</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$3,500 MXN</div>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-3 fire-text">Cantidad de Videos</label>
+                                            <select id="quantity-select" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                <option value="15" data-multiplier="1.0">15 videos (x1.0)</option>
+                                                <option value="30" data-multiplier="1.8">30 videos (x1.8)</option>
+                                                <option value="60" data-multiplier="3.2">60 videos (x3.2)</option>
+                                                <option value="120" data-multiplier="5.8">120 videos (x5.8)</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-3 fire-text">Velocidad de Entrega</label>
+                                            <select id="speed-select" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                <option value="normal" data-multiplier="1.0">Normal (2-5 días) - Sin recargo</option>
+                                                <option value="fast" data-multiplier="1.2">Rápido (2-3 días) - +20%</option>
+                                                <option value="extreme" data-multiplier="1.5">Extremo (1-2 días) - +50%</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-6">
+                                        <div class="glass-card rounded-lg p-6 fire-border bg-gradient-to-br from-orange-900/20 to-red-900/20">
+                                            <h3 class="text-xl font-bold mb-4 fire-text">Resumen del Proyecto</h3>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between">
+                                                    <span class="text-muted-foreground">Precio base:</span>
+                                                    <span id="base-price" class="font-semibold">$1,600 MXN</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-muted-foreground">Cantidad:</span>
+                                                    <span id="quantity-display" class="font-semibold">15 videos (x1.0)</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-muted-foreground">Velocidad:</span>
+                                                    <span id="speed-display" class="font-semibold">Normal (Sin recargo)</span>
+                                                </div>
+                                                <hr class="border-border">
+                                                <div class="flex justify-between text-xl font-bold">
+                                                    <span class="fire-text">Total:</span>
+                                                    <span id="total-price" class="fire-text">$1,600 MXN</span>
+                                                </div>
+                                                <div class="text-center text-sm text-muted-foreground">
+                                                    <span id="total-price-usd">($89 USD)</span>
+                                                </div>
+                                            </div>
+                                            <button class="w-full fire-gradient text-white py-3 rounded-lg font-semibold mt-6 hover:opacity-90 transition-opacity">
+                                                <i class="fab fa-whatsapp mr-2"></i>
+                                                Solicitar Cotización
+                                            </button>
+                                        </div>
+
+                                        <!-- Videos Cantados Packages -->
+                                        <div class="glass-card rounded-lg p-6 fire-border">
+                                            <h3 class="text-lg font-bold mb-4 fire-text">Videos Cantados - Paquetes</h3>
+                                            <div class="space-y-3">
+                                                <div class="flex justify-between items-center p-3 border border-border rounded-lg">
+                                                    <div>
+                                                        <div class="font-medium">Básico</div>
+                                                        <div class="text-sm text-muted-foreground">15 videos</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$1,600</div>
+                                                </div>
+                                                <div class="flex justify-between items-center p-3 border border-border rounded-lg">
+                                                    <div>
+                                                        <div class="font-medium">Estándar</div>
+                                                        <div class="text-sm text-muted-foreground">30 videos</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$3,000</div>
+                                                </div>
+                                                <div class="flex justify-between items-center p-3 border border-border rounded-lg">
+                                                    <div>
+                                                        <div class="font-medium">Premium</div>
+                                                        <div class="text-sm text-muted-foreground">60 videos</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$5,500</div>
+                                                </div>
+                                                <div class="flex justify-between items-center p-3 border border-border rounded-lg">
+                                                    <div>
+                                                        <div class="font-medium">Empresarial</div>
+                                                        <div class="text-sm text-muted-foreground">120 videos</div>
+                                                    </div>
+                                                    <div class="fire-text font-semibold">$9,900</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- @END_COMPONENT: PriceCalculator -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact Section -->
+                <section id="contact" class="py-20 bg-card/50">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                                <span class="fire-text">Contactanos</span>
+                            </h2>
+                            <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+                                ¿Listo para llevar tu proyecto al siguiente nivel? Contáctanos hoy mismo
+                            </p>
+                        </div>
+
+                        <div class="max-w-4xl mx-auto grid lg:grid-cols-2 gap-8">
+                            <div class="glass-card rounded-xl p-8 fire-border">
+                                <h3 class="text-xl font-bold mb-6 fire-text">Formulario de Contacto</h3>
+                                <form class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Nombre completo</label>
+                                        <input type="text" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Tu nombre">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Email</label>
+                                        <input type="email" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="tu@email.com">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Teléfono</label>
+                                        <input type="tel" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="+52 55 1234 5678">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Mensaje</label>
+                                        <textarea rows="4" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Describe tu proyecto..."></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full fire-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                        Enviar Mensaje
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="glass-card rounded-xl p-8 fire-border">
+                                    <h3 class="text-xl font-bold mb-6 fire-text">Información de Contacto</h3>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                                                <i class="fab fa-whatsapp text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium">WhatsApp</div>
+                                                <div class="text-muted-foreground" data-bind="config.whatsappNumber">+52 55 1234 5678</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-envelope text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium">Email</div>
+                                                <div class="text-muted-foreground">info@videoventa.com</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-clock text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium">Horario</div>
+                                                <div class="text-muted-foreground">Lun - Vie: 9:00 - 18:00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fire theme background with professional video equipment -->
+                                <div class="glass-card rounded-xl p-8 fire-border relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-red-900/20 via-orange-900/20 to-yellow-900/20"></div>
+                                    <div class="relative">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">¿Por qué elegir VideoVenta?</h3>
+                                        <ul class="space-y-2 text-muted-foreground">
+                                            <li class="flex items-center">
+                                                <i class="fas fa-check text-primary mr-2"></i>
+                                                Entrega garantizada en tiempo
+                                            </li>
+                                            <li class="flex items-center">
+                                                <i class="fas fa-check text-primary mr-2"></i>
+                                                Revisiones ilimitadas
+                                            </li>
+                                            <li class="flex items-center">
+                                                <i class="fas fa-check text-primary mr-2"></i>
+                                                Calidad 4K profesional
+                                            </li>
+                                            <li class="flex items-center">
+                                                <i class="fas fa-check text-primary mr-2"></i>
+                                                Soporte 24/7
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- @END_COMPONENT: LandingPage -->
+
+            <!-- @COMPONENT: AdminPanel [administration interface] -->
+            <div id="admin-page" class="page-content hidden">
+                <!-- Admin Header -->
+                <div class="bg-card border-b border-border">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex items-center justify-between h-16">
+                            <h1 class="text-2xl font-bold fire-text">Panel de Administración</h1>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-muted-foreground">Bienvenido, Admin</span>
+                                <button id="logout-btn" class="text-muted-foreground hover:text-destructive transition-colors">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </button>
+                                <button id="back-to-main" class="fire-gradient text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                    Volver al Sitio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="grid lg:grid-cols-12 gap-8">
+                        <!-- Sidebar Navigation -->
+                        <div class="lg:col-span-3">
+                            <nav class="glass-card rounded-xl p-6 fire-border space-y-2">
+                                <button class="admin-nav-btn w-full text-left p-3 rounded-lg hover:bg-muted transition-colors active" data-section="dashboard">
+                                    <i class="fas fa-chart-line mr-2"></i>
+                                    Dashboard
+                                </button>
+                                <button class="admin-nav-btn w-full text-left p-3 rounded-lg hover:bg-muted transition-colors" data-section="clients">
+                                    <i class="fas fa-users mr-2"></i>
+                                    Gestión de Clientes
+                                </button>
+                                <button class="admin-nav-btn w-full text-left p-3 rounded-lg hover:bg-muted transition-colors" data-section="config">
+                                    <i class="fas fa-cog mr-2"></i>
+                                    Configuración
+                                </button>
+                                <button class="admin-nav-btn w-full text-left p-3 rounded-lg hover:bg-muted transition-colors" data-section="pricing">
+                                    <i class="fas fa-dollar-sign mr-2"></i>
+                                    Precios
+                                </button>
+                                <button class="admin-nav-btn w-full text-left p-3 rounded-lg hover:bg-muted transition-colors" data-section="content">
+                                    <i class="fas fa-edit mr-2"></i>
+                                    Contenido
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Main Content Area -->
+                        <div class="lg:col-span-9">
+                            <!-- @COMPONENT: DashboardSection [admin dashboard] -->
+                            <div id="admin-dashboard" class="admin-section">
+                                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm text-muted-foreground">Total Clientes</p>
+                                                <p class="text-2xl font-bold fire-text" data-bind="stats.totalClients">24</p>
+                                            </div>
+                                            <div class="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-users text-white"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm text-muted-foreground">Proyectos Activos</p>
+                                                <p class="text-2xl font-bold fire-text" data-bind="stats.activeProjects">12</p>
+                                            </div>
+                                            <div class="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-video text-white"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm text-muted-foreground">Ingresos del Mes</p>
+                                                <p class="text-2xl font-bold fire-text" data-bind="stats.monthlyRevenue">$45,200</p>
+                                            </div>
+                                            <div class="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-chart-line text-white"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="glass-card rounded-xl p-6 fire-border">
+                                    <h3 class="text-xl font-bold mb-4 fire-text">Actividad Reciente</h3>
+                                    <div class="space-y-4">
+                                        <!-- @MAP: recentActivity.map(activity => ( -->
+                                        <div class="flex items-center justify-between p-4 border border-border rounded-lg" data-mock="true">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-plus text-white text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-medium">Nuevo cliente agregado</p>
+                                                    <p class="text-sm text-muted-foreground">Empresa ABC Corp</p>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-muted-foreground">Hace 2 horas</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-4 border border-border rounded-lg" data-mock="true">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-upload text-white text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-medium">Video entregado</p>
+                                                    <p class="text-sm text-muted-foreground">Proyecto: Video Corporativo XYZ</p>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-muted-foreground">Hace 5 horas</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-4 border border-border rounded-lg" data-mock="true">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-edit text-white text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-medium">Configuración actualizada</p>
+                                                    <p class="text-sm text-muted-foreground">Precios de paquetes modificados</p>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-muted-foreground">Hace 1 día</span>
+                                        </div>
+                                        <!-- @END_MAP )) -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: DashboardSection -->
+
+                            <!-- @COMPONENT: ClientsSection [client management] -->
+                            <div id="admin-clients" class="admin-section hidden">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-2xl font-bold fire-text">Gestión de Clientes</h2>
+                                    <button id="add-client-btn" class="fire-gradient text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Agregar Cliente
+                                    </button>
+                                </div>
+
+                                <div class="glass-card rounded-xl overflow-hidden fire-border">
+                                    <div class="p-6 border-b border-border">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="flex-1">
+                                                <input type="text" placeholder="Buscar clientes..." class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                            </div>
+                                            <select class="p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                <option>Todos los estados</option>
+                                                <option>Activos</option>
+                                                <option>Completados</option>
+                                                <option>En progreso</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full">
+                                            <thead class="bg-muted/20">
+                                                <tr>
+                                                    <th class="text-left p-4 font-medium text-muted-foreground">Cliente</th>
+                                                    <th class="text-left p-4 font-medium text-muted-foreground">Email</th>
+                                                    <th class="text-left p-4 font-medium text-muted-foreground">Teléfono</th>
+                                                    <th class="text-left p-4 font-medium text-muted-foreground">Proyectos</th>
+                                                    <th class="text-left p-4 font-medium text-muted-foreground">Estado</th>
+                                                    <th class="text-left p-4 font-medium text-muted-foreground">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- @MAP: clients.map(client => ( -->
+                                                <tr class="border-t border-border" data-mock="true">
+                                                    <td class="p-4">
+                                                        <div class="flex items-center space-x-3">
+                                                            <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                                                                <span class="text-white font-semibold">AC</span>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-medium" data-bind="client.name">ABC Corporation</div>
+                                                                <div class="text-sm text-muted-foreground" data-bind="client.username">abc-corp</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="p-4 text-muted-foreground" data-bind="client.email">contacto@abccorp.com</td>
+                                                    <td class="p-4 text-muted-foreground" data-bind="client.phone">+52 55 1234 5678</td>
+                                                    <td class="p-4">
+                                                        <span class="bg-primary/20 text-primary px-2 py-1 rounded text-sm" data-bind="client.projectCount">3 proyectos</span>
+                                                    </td>
+                                                    <td class="p-4">
+                                                        <span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-sm">Activo</span>
+                                                    </td>
+                                                    <td class="p-4">
+                                                        <div class="flex items-center space-x-2">
+                                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                            <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button class="text-destructive hover:text-destructive/80 transition-colors">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-t border-border" data-mock="true">
+                                                    <td class="p-4">
+                                                        <div class="flex items-center space-x-3">
+                                                            <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                                                                <span class="text-white font-semibold">XY</span>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-medium">XYZ Marketing</div>
+                                                                <div class="text-sm text-muted-foreground">xyz-marketing</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="p-4 text-muted-foreground">info@xyzmarketing.com</td>
+                                                    <td class="p-4 text-muted-foreground">+52 55 9876 5432</td>
+                                                    <td class="p-4">
+                                                        <span class="bg-primary/20 text-primary px-2 py-1 rounded text-sm">1 proyecto</span>
+                                                    </td>
+                                                    <td class="p-4">
+                                                        <span class="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-sm">En progreso</span>
+                                                    </td>
+                                                    <td class="p-4">
+                                                        <div class="flex items-center space-x-2">
+                                                            <button class="text-primary hover:text-primary/80 transition-colors">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                            <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            <button class="text-destructive hover:text-destructive/80 transition-colors">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <!-- @END_MAP )) -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: ClientsSection -->
+
+                            <!-- @COMPONENT: ConfigSection [global configuration] -->
+                            <div id="admin-config" class="admin-section hidden">
+                                <h2 class="text-2xl font-bold fire-text mb-6">Configuración Global</h2>
+
+                                <div class="space-y-6">
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">WhatsApp Integration</h3>
+                                        <div class="grid md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Número de WhatsApp</label>
+                                                <input type="tel" id="whatsapp-config" value="+52 55 1234 5678" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                <p class="text-xs text-muted-foreground mt-1">Formato: +52 55 1234 5678</p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Nombre del Negocio</label>
+                                                <input type="text" id="business-name-config" value="VideoVenta" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                <p class="text-xs text-muted-foreground mt-1">Aparece en mensajes de WhatsApp</p>
+                                            </div>
+                                        </div>
+                                        <button id="save-whatsapp-config" class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mt-4">
+                                            Guardar Configuración
+                                        </button>
+                                    </div>
+
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">Configuración del Sitio</h3>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Título Principal</label>
+                                                <input type="text" value="Producción de Videos Profesionales" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Descripción del Hero</label>
+                                                <textarea rows="3" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">Creamos contenido audiovisual de alta calidad que impulsa tu marca. Desde videos corporativos hasta campañas promocionales completas.</textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Email de Contacto</label>
+                                                <input type="email" value="info@videoventa.com" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                            </div>
+                                        </div>
+                                        <button class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mt-4">
+                                            Actualizar Contenido
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: ConfigSection -->
+
+                            <!-- @COMPONENT: PricingSection [pricing management] -->
+                            <div id="admin-pricing" class="admin-section hidden">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-2xl font-bold fire-text">Gestión de Precios</h2>
+                                    <button class="fire-gradient text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                        <i class="fas fa-sync mr-2"></i>
+                                        Sincronizar con Calculadora
+                                    </button>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">Precios por Duración</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid md:grid-cols-3 gap-4 p-4 border border-border rounded-lg">
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-2">5-10 minutos</label>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="1600" class="flex-1 p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" data-pricing-key="duration-5-10-mxn">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-2">USD Equivalente</label>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="89" class="flex-1 p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" data-pricing-key="duration-5-10-usd">
+                                                        <span class="flex items-center text-muted-foreground">USD</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-end">
+                                                    <button class="w-full fire-gradient text-white px-4 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                                        Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid md:grid-cols-3 gap-4 p-4 border border-border rounded-lg">
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-2">10-20 minutos</label>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="2600" class="flex-1 p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" data-pricing-key="duration-10-20-mxn">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-2">USD Equivalente</label>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="144" class="flex-1 p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" data-pricing-key="duration-10-20-usd">
+                                                        <span class="flex items-center text-muted-foreground">USD</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-end">
+                                                    <button class="w-full fire-gradient text-white px-4 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                                        Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid md:grid-cols-3 gap-4 p-4 border border-border rounded-lg">
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-2">20-30 minutos</label>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="3500" class="flex-1 p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" data-pricing-key="duration-20-30-mxn">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium mb-2">USD Equivalente</label>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="194" class="flex-1 p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" data-pricing-key="duration-20-30-usd">
+                                                        <span class="flex items-center text-muted-foreground">USD</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-end">
+                                                    <button class="w-full fire-gradient text-white px-4 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                                        Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">Multiplicadores</h3>
+                                        <div class="grid md:grid-cols-2 gap-6">
+                                            <div>
+                                                <h4 class="font-semibold mb-3">Velocidad de Entrega</h4>
+                                                <div class="space-y-3">
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>Normal (2-5 días)</span>
+                                                        <input type="number" step="0.1" value="1.0" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>Rápido (2-3 días)</span>
+                                                        <input type="number" step="0.1" value="1.2" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>Extremo (1-2 días)</span>
+                                                        <input type="number" step="0.1" value="1.5" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold mb-3">Cantidad de Videos</h4>
+                                                <div class="space-y-3">
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>15 videos</span>
+                                                        <input type="number" step="0.1" value="1.0" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>30 videos</span>
+                                                        <input type="number" step="0.1" value="1.8" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>60 videos</span>
+                                                        <input type="number" step="0.1" value="3.2" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                    <div class="flex items-center justify-between p-3 border border-border rounded-lg">
+                                                        <span>120 videos</span>
+                                                        <input type="number" step="0.1" value="5.8" class="w-20 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mt-6">
+                                            Guardar Multiplicadores
+                                        </button>
+                                    </div>
+
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">Paquetes de Videos Cantados</h3>
+                                        <div class="grid md:grid-cols-2 gap-4">
+                                            <div class="space-y-4">
+                                                <div class="p-4 border border-border rounded-lg">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <span class="font-medium">Básico (15 videos)</span>
+                                                    </div>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="1600" class="flex-1 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                                <div class="p-4 border border-border rounded-lg">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <span class="font-medium">Estándar (30 videos)</span>
+                                                    </div>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="3000" class="flex-1 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-4">
+                                                <div class="p-4 border border-border rounded-lg">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <span class="font-medium">Premium (60 videos)</span>
+                                                    </div>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="5500" class="flex-1 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                                <div class="p-4 border border-border rounded-lg">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <span class="font-medium">Empresarial (120 videos)</span>
+                                                    </div>
+                                                    <div class="flex space-x-2">
+                                                        <input type="number" value="9900" class="flex-1 p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                        <span class="flex items-center text-muted-foreground">MXN</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mt-6">
+                                            Actualizar Paquetes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: PricingSection -->
+
+                            <!-- @COMPONENT: ContentSection [content management] -->
+                            <div id="admin-content" class="admin-section hidden">
+                                <h2 class="text-2xl font-bold fire-text mb-6">Gestión de Contenido</h2>
+
+                                <div class="space-y-6">
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">Videos de Muestra</h3>
+                                        <div class="grid md:grid-cols-3 gap-6">
+                                            <div class="border border-border rounded-lg p-4">
+                                                <div class="aspect-video bg-muted rounded-lg mb-4 relative">
+                                                    <!-- Fire theme backgrounds for video placeholders -->
+                                                    <div class="absolute inset-0 bg-gradient-to-br from-red-900/50 to-orange-900/50 rounded-lg"></div>
+                                                    <div class="absolute inset-0 flex items-center justify-center">
+                                                        <i class="fas fa-video text-white text-2xl"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-3">
+                                                    <input type="text" placeholder="Título del video" value="Video Corporativo" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <input type="text" placeholder="Descripción" value="Presentaciones empresariales profesionales" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <input type="url" placeholder="URL del video" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <button class="w-full fire-gradient text-white py-2 rounded font-semibold hover:opacity-90 transition-opacity">
+                                                        Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="border border-border rounded-lg p-4">
+                                                <div class="aspect-video bg-muted rounded-lg mb-4 relative">
+                                                    <!-- Fire theme backgrounds -->
+                                                    <div class="absolute inset-0 bg-gradient-to-br from-orange-900/50 to-yellow-900/50 rounded-lg"></div>
+                                                    <div class="absolute inset-0 flex items-center justify-center">
+                                                        <i class="fas fa-video text-white text-2xl"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-3">
+                                                    <input type="text" placeholder="Título del video" value="Video Promocional" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <input type="text" placeholder="Descripción" value="Campañas publicitarias impactantes" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <input type="url" placeholder="URL del video" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <button class="w-full fire-gradient text-white py-2 rounded font-semibold hover:opacity-90 transition-opacity">
+                                                        Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="border border-border rounded-lg p-4">
+                                                <div class="aspect-video bg-muted rounded-lg mb-4 relative">
+                                                    <!-- Fire theme backgrounds -->
+                                                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-900/50 to-red-900/50 rounded-lg"></div>
+                                                    <div class="absolute inset-0 flex items-center justify-center">
+                                                        <i class="fas fa-video text-white text-2xl"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-3">
+                                                    <input type="text" placeholder="Título del video" value="Video Explicativo" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <input type="text" placeholder="Descripción" value="Tutoriales y contenido educativo" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <input type="url" placeholder="URL del video" class="w-full p-2 bg-input border border-border rounded text-foreground focus:border-primary">
+                                                    <button class="w-full fire-gradient text-white py-2 rounded font-semibold hover:opacity-90 transition-opacity">
+                                                        Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card rounded-xl p-6 fire-border">
+                                        <h3 class="text-xl font-bold mb-4 fire-text">Imágenes de Fondo</h3>
+                                        <div class="grid md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Hero Section Background</label>
+                                                <div class="space-y-3">
+                                                    <div class="aspect-video bg-gradient-to-br from-red-900/20 to-orange-900/20 rounded-lg border border-border relative">
+                                                        <!-- Fire theme background example -->
+                                                        <img src="https://images.unsplash.com/photo-1525909002-1b05e0c869d8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400" alt="Fire background" class="w-full h-full object-cover rounded-lg opacity-60" data-mock-image="true" data-implementation="Admin can upload fire theme backgrounds" />
+                                                        <div class="absolute inset-0 bg-gradient-to-br from-red-900/40 to-orange-900/40 rounded-lg"></div>
+                                                    </div>
+                                                    <input type="url" placeholder="URL de imagen de fondo" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                    <button class="w-full fire-gradient text-white py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                                        Cambiar Fondo Hero
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium mb-2">Calculator Section Background</label>
+                                                <div class="space-y-3">
+                                                    <div class="aspect-video bg-gradient-to-br from-orange-900/20 to-yellow-900/20 rounded-lg border border-border relative">
+                                                        <!-- Modern fire background -->
+                                                        <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400" alt="Modern fire texture" class="w-full h-full object-cover rounded-lg opacity-60" data-mock-image="true" data-implementation="Admin can upload calculator section backgrounds" />
+                                                        <div class="absolute inset-0 bg-gradient-to-br from-orange-900/40 to-yellow-900/40 rounded-lg"></div>
+                                                    </div>
+                                                    <input type="url" placeholder="URL de imagen de fondo" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
+                                                    <button class="w-full fire-gradient text-white py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                                        Cambiar Fondo Calculadora
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: ContentSection -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: AdminPanel -->
+
+            <!-- @COMPONENT: ClientPage [client delivery interface] -->
+            <div id="client-page" class="page-content hidden">
+                <div class="min-h-screen bg-gradient-to-br from-background via-card to-background">
+                    <!-- Client Header -->
+                    <header class="glass-card border-b border-border">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex items-center justify-between h-16">
+                                <div class="flex items-center space-x-4">
+                                    <div class="fire-gradient w-10 h-10 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-video text-white text-xl"></i>
+                                    </div>
+                                    <span class="text-2xl font-bold fire-text">VideoVenta</span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm text-muted-foreground">Cliente:</div>
+                                    <div class="font-semibold" data-bind="client.name">ABC Corporation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Client Content -->
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div class="max-w-4xl mx-auto">
+                            <!-- Welcome Section -->
+                            <div class="text-center mb-12">
+                                <h1 class="text-3xl md:text-4xl font-bold mb-4">
+                                    <span class="fire-text">Bienvenido,</span>
+                                    <span class="text-foreground" data-bind="client.name">ABC Corporation</span>
+                                </h1>
+                                <p class="text-xl text-muted-foreground">
+                                    Aquí puedes descargar todos los archivos de tu proyecto y documentación asociada
+                                </p>
+                            </div>
+
+                            <!-- Project Information -->
+                            <div class="glass-card rounded-xl p-8 fire-border mb-8">
+                                <h2 class="text-2xl font-bold fire-text mb-6">Información del Proyecto</h2>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="text-sm text-muted-foreground">Tipo de Proyecto</label>
+                                            <p class="font-semibold" data-bind="project.type">Video Corporativo</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-muted-foreground">Duración</label>
+                                            <p class="font-semibold" data-bind="project.duration">10-15 minutos</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-muted-foreground">Cantidad de Videos</label>
+                                            <p class="font-semibold" data-bind="project.quantity">30 videos</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="text-sm text-muted-foreground">Estado</label>
+                                            <span class="inline-block bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">Completado</span>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-muted-foreground">Fecha de Entrega</label>
+                                            <p class="font-semibold" data-bind="project.deliveryDate">15 de Diciembre, 2024</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-muted-foreground">Formato</label>
+                                            <p class="font-semibold" data-bind="project.format">MP4 - 1080p HD</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Download Section -->
+                            <div class="glass-card rounded-xl p-8 fire-border mb-8">
+                                <h2 class="text-2xl font-bold fire-text mb-6">
+                                    <i class="fas fa-download mr-2"></i>
+                                    Archivos de Descarga
+                                </h2>
+                                <div class="space-y-4">
+                                    <!-- @MAP: downloadFiles.map(file => ( -->
+                                    <div class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/20 transition-colors" data-mock="true">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-video text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold" data-bind="file.name">Video_Corporativo_Final.mp4</h3>
+                                                <p class="text-sm text-muted-foreground" data-bind="file.size">245.6 MB</p>
+                                            </div>
+                                        </div>
+                                        <button class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                            <i class="fas fa-download mr-2"></i>
+                                            Descargar
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/20 transition-colors" data-mock="true">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-archive text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold">Videos_Adicionales.zip</h3>
+                                                <p class="text-sm text-muted-foreground">1.2 GB</p>
+                                            </div>
+                                        </div>
+                                        <button class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                            <i class="fas fa-download mr-2"></i>
+                                            Descargar
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/20 transition-colors" data-mock="true">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="fire-gradient w-12 h-12 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-pdf text-white"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold">Licencia_y_Derechos.pdf</h3>
+                                                <p class="text-sm text-muted-foreground">2.1 MB</p>
+                                            </div>
+                                        </div>
+                                        <button class="fire-gradient text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                            <i class="fas fa-download mr-2"></i>
+                                            Descargar
+                                        </button>
+                                    </div>
+                                    <!-- @END_MAP )) -->
+                                </div>
+                            </div>
+
+                            <!-- Additional Information -->
+                            <div class="glass-card rounded-xl p-8 fire-border">
+                                <h2 class="text-2xl font-bold fire-text mb-6">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Información Adicional
+                                </h2>
+                                <div class="grid md:grid-cols-2 gap-8">
+                                    <div>
+                                        <h3 class="font-semibold mb-3">Instrucciones de Uso</h3>
+                                        <ul class="space-y-2 text-muted-foreground">
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-primary mr-2 mt-1 flex-shrink-0"></i>
+                                                Los videos están optimizados para redes sociales y web
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-primary mr-2 mt-1 flex-shrink-0"></i>
+                                                Formato MP4 compatible con todas las plataformas
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-primary mr-2 mt-1 flex-shrink-0"></i>
+                                                Resolución 1080p para máxima calidad
+                                            </li>
+                                            <li class="flex items-start">
+                                                <i class="fas fa-check text-primary mr-2 mt-1 flex-shrink-0"></i>
+                                                Audio en calidad profesional 48kHz
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold mb-3">Soporte y Contacto</h3>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+                                                    <i class="fab fa-whatsapp text-white text-sm"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-muted-foreground">WhatsApp</p>
+                                                    <p class="font-semibold" data-bind="config.whatsappNumber">+52 55 1234 5678</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-envelope text-white text-sm"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-muted-foreground">Email</p>
+                                                    <p class="font-semibold">soporte@videoventa.com</p>
+                                                </div>
+                                            </div>
+                                            <button class="w-full fire-gradient text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity mt-4">
+                                                <i class="fab fa-whatsapp mr-2"></i>
+                                                Contactar Soporte
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: ClientPage -->
+        </main>
+        <!-- @END_COMPONENT: AppRouter -->
+
+        <!-- Footer -->
+        <footer class="bg-card border-t border-border py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="fire-gradient w-8 h-8 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-video text-white"></i>
+                            </div>
+                            <span class="text-xl font-bold fire-text">VideoVenta</span>
+                        </div>
+                        <p class="text-muted-foreground">
+                            Creamos contenido audiovisual profesional que impulsa tu marca y conecta con tu audiencia.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Servicios</h3>
+                        <ul class="space-y-2 text-muted-foreground">
+                            <li><a href="#" class="hover:text-primary transition-colors">Videos Corporativos</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Videos Promocionales</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Videos Explicativos</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Videos Cantados</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Empresa</h3>
+                        <ul class="space-y-2 text-muted-foreground">
+                            <li><a href="#" class="hover:text-primary transition-colors">Acerca de</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Portafolio</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Testimonios</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Contacto</h3>
+                        <ul class="space-y-2 text-muted-foreground">
+                            <li class="flex items-center">
+                                <i class="fab fa-whatsapp mr-2"></i>
+                                <span data-bind="config.whatsappNumber">+52 55 1234 5678</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-envelope mr-2"></i>
+                                info@videoventa.com
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-clock mr-2"></i>
+                                Lun - Vie: 9:00 - 18:00
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+                    <p>&copy; 2024 VideoVenta. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Admin Authentication Modal -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-xl p-8 w-full max-w-md fire-border">
+                <h2 class="text-2xl font-bold fire-text mb-6 text-center">Acceso Administrativo</h2>
+                <form id="admin-login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Contraseña de Administrador</label>
+                        <input type="password" id="admin-password" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Ingresa la contraseña" required>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="button" id="admin-cancel" class="flex-1 border border-border text-foreground px-4 py-3 rounded-lg font-semibold hover:bg-muted transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="flex-1 fire-gradient text-white px-4 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Ingresar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Client Modal -->
+    <div id="add-client-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="glass-card rounded-xl p-8 w-full max-w-2xl fire-border">
+                <h2 class="text-2xl font-bold fire-text mb-6">Agregar Nuevo Cliente</h2>
+                <form id="add-client-form" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Nombre de la Empresa</label>
+                            <input type="text" id="client-name" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="ABC Corporation" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Email de Contacto</label>
+                            <input type="email" id="client-email" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="contacto@abccorp.com" required>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Teléfono</label>
+                            <input type="tel" id="client-phone" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="+52 55 1234 5678">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Username (Generado automáticamente)</label>
+                            <input type="text" id="client-username" class="w-full p-3 bg-muted border border-border rounded-lg text-muted-foreground" placeholder="abc-corporation" readonly>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Información del Proyecto</label>
+                        <textarea id="client-project-info" rows="3" class="w-full p-3 bg-input border border-border rounded-lg text-foreground focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Describe el proyecto, duración, tipo de video, etc."></textarea>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="button" id="cancel-add-client" class="flex-1 border border-border text-foreground px-4 py-3 rounded-lg font-semibold hover:bg-muted transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="flex-1 fire-gradient text-white px-4 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Crear Cliente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global configuration object for real-time synchronization
+        window.VideoVentaConfig = {
+            whatsappNumber: '+52 55 1234 5678',
+            businessName: 'VideoVenta',
+            pricing: {
+                durations: {
+                    '5-10': { mxn: 1600, usd: 89 },
+                    '10-20': { mxn: 2600, usd: 144 },
+                    '20-30': { mxn: 3500, usd: 194 }
+                },
+                speeds: {
+                    normal: 1.0,
+                    fast: 1.2,
+                    extreme: 1.5
+                },
+                quantities: {
+                    15: 1.0,
+                    30: 1.8,
+                    60: 3.2,
+                    120: 5.8
+                },
+                singingPackages: {
+                    basic: { mxn: 1600, usd: 89, videos: 15 },
+                    standard: { mxn: 3000, usd: 167, videos: 30 },
+                    premium: { mxn: 5500, usd: 306, videos: 60 },
+                    business: { mxn: 9900, usd: 550, videos: 120 }
+                }
+            }
+        };
+
+        // @FUNCTIONALITY: Price calculator with real-time updates
+        (function() {
+            let currentPage = 'home';
+            
+            // Navigation functionality
+            function showPage(pageId) {
+                // Hide all pages
+                document.querySelectorAll('.page-content').forEach(page => {
+                    page.classList.add('hidden');
+                });
+                
+                // Show selected page
+                document.getElementById(pageId).classList.remove('hidden');
+                currentPage = pageId;
+            }
+
+            // Price calculation functionality
+            function calculatePrice() {
+                const durationRadio = document.querySelector('input[name="duration"]:checked');
+                const quantitySelect = document.getElementById('quantity-select');
+                const speedSelect = document.getElementById('speed-select');
+
+                if (!durationRadio) return;
+
+                const basePriceMXN = parseInt(durationRadio.dataset.priceMxn);
+                const basePriceUSD = parseInt(durationRadio.dataset.priceUsd);
+                const quantityMultiplier = parseFloat(quantitySelect.selectedOptions[0].dataset.multiplier);
+                const speedMultiplier = parseFloat(speedSelect.selectedOptions[0].dataset.multiplier);
+
+                const totalMXN = Math.round(basePriceMXN * quantityMultiplier * speedMultiplier);
+                const totalUSD = Math.round(basePriceUSD * quantityMultiplier * speedMultiplier);
+
+                // Update display
+                document.getElementById('base-price').textContent = `$${basePriceMXN.toLocaleString()} MXN`;
+                document.getElementById('quantity-display').textContent = quantitySelect.options[quantitySelect.selectedIndex].text;
+                document.getElementById('speed-display').textContent = speedSelect.options[speedSelect.selectedIndex].text.split(' - ')[0];
+                document.getElementById('total-price').textContent = `$${totalMXN.toLocaleString()} MXN`;
+                document.getElementById('total-price-usd').textContent = `($${totalUSD} USD)`;
+            }
+
+            // Admin functionality
+            function initAdminPanel() {
+                const adminNavBtns = document.querySelectorAll('.admin-nav-btn');
+                const adminSections = document.querySelectorAll('.admin-section');
+
+                adminNavBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Remove active class from all buttons
+                        adminNavBtns.forEach(b => b.classList.remove('active', 'fire-gradient', 'text-white'));
+                        
+                        // Add active class to clicked button
+                        btn.classList.add('active', 'fire-gradient', 'text-white');
+
+                        // Hide all sections
+                        adminSections.forEach(section => section.classList.add('hidden'));
+
+                        // Show selected section
+                        const sectionId = 'admin-' + btn.dataset.section;
+                        document.getElementById(sectionId).classList.remove('hidden');
+                    });
+                });
+
+                // WhatsApp configuration synchronization
+                document.getElementById('save-whatsapp-config').addEventListener('click', () => {
+                    const newNumber = document.getElementById('whatsapp-config').value;
+                    const newBusinessName = document.getElementById('business-name-config').value;
+                    
+                    // Update global config
+                    window.VideoVentaConfig.whatsappNumber = newNumber;
+                    window.VideoVentaConfig.businessName = newBusinessName;
+                    
+                    // Sync across all instances in the site
+                    document.querySelectorAll('[data-bind="config.whatsappNumber"]').forEach(el => {
+                        el.textContent = newNumber;
+                    });
+                    
+                    // Show success notification
+                    alert('Configuración de WhatsApp actualizada correctamente');
+                });
+
+                // Pricing synchronization
+                document.querySelectorAll('[data-pricing-key]').forEach(input => {
+                    input.addEventListener('change', () => {
+                        // TODO: Implement real-time pricing synchronization with calculator
+                        calculatePrice();
+                    });
+                });
+            }
+
+            // Client management functionality
+            function initClientManagement() {
+                const addClientBtn = document.getElementById('add-client-btn');
+                const addClientModal = document.getElementById('add-client-modal');
+                const cancelAddClient = document.getElementById('cancel-add-client');
+                const addClientForm = document.getElementById('add-client-form');
+                const clientNameInput = document.getElementById('client-name');
+                const clientUsernameInput = document.getElementById('client-username');
+
+                // Auto-generate username from company name
+                clientNameInput.addEventListener('input', () => {
+                    const username = clientNameInput.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-|-$/g, '');
+                    clientUsernameInput.value = username;
+                });
+
+                addClientBtn.addEventListener('click', () => {
+                    addClientModal.classList.remove('hidden');
+                });
+
+                cancelAddClient.addEventListener('click', () => {
+                    addClientModal.classList.add('hidden');
+                    addClientForm.reset();
+                });
+
+                addClientForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    // TODO: Implement client creation and database storage
+                    const clientData = {
+                        name: document.getElementById('client-name').value,
+                        email: document.getElementById('client-email').value,
+                        phone: document.getElementById('client-phone').value,
+                        username: document.getElementById('client-username').value,
+                        projectInfo: document.getElementById('client-project-info').value,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    console.log('Creating client:', clientData);
+                    
+                    // Close modal and reset form
+                    addClientModal.classList.add('hidden');
+                    addClientForm.reset();
+                    
+                    // Show success message
+                    alert('Cliente creado correctamente');
+                });
+            }
+
+            // Authentication functionality
+            function initAuth() {
+                const adminBtn = document.getElementById('admin-btn');
+                const adminModal = document.getElementById('admin-modal');
+                const adminCancel = document.getElementById('admin-cancel');
+                const adminLoginForm = document.getElementById('admin-login-form');
+                const backToMainBtn = document.getElementById('back-to-main');
+                const logoutBtn = document.getElementById('logout-btn');
+
+                adminBtn.addEventListener('click', () => {
+                    adminModal.classList.remove('hidden');
+                });
+
+                adminCancel.addEventListener('click', () => {
+                    adminModal.classList.add('hidden');
+                    adminLoginForm.reset();
+                });
+
+                adminLoginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const password = document.getElementById('admin-password').value;
+                    
+                    // Simple password check (in production, use proper authentication)
+                    if (password === 'admin123') {
+                        adminModal.classList.add('hidden');
+                        showPage('admin-page');
+                        adminLoginForm.reset();
+                    } else {
+                        alert('Contraseña incorrecta');
+                    }
+                });
+
+                backToMainBtn.addEventListener('click', () => {
+                    showPage('landing-page');
+                });
+
+                logoutBtn.addEventListener('click', () => {
+                    showPage('landing-page');
+                });
+            }
+
+            // WhatsApp integration
+            function initWhatsAppIntegration() {
+                document.getElementById('whatsapp-contact').addEventListener('click', () => {
+                    const message = 'Hola, me interesa conocer más sobre sus servicios de producción de video.';
+                    const whatsappUrl = `https://api.whatsapp.com/send?phone=${window.VideoVentaConfig.whatsappNumber.replace(/\s+/g, '')}&text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
+                });
+            }
+
+            // Smooth scrolling for navigation
+            function initSmoothScrolling() {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.getAttribute('href').substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement && currentPage === 'landing-page') {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Initialize all functionality when DOM is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                // Set up price calculator
+                document.querySelectorAll('input[name="duration"]').forEach(radio => {
+                    radio.addEventListener('change', calculatePrice);
+                });
+                
+                document.getElementById('quantity-select').addEventListener('change', calculatePrice);
+                document.getElementById('speed-select').addEventListener('change', calculatePrice);
+                
+                // Initial calculation
+                calculatePrice();
+
+                // Initialize other components
+                initAdminPanel();
+                initClientManagement();
+                initAuth();
+                initWhatsAppIntegration();
+                initSmoothScrolling();
+
+                // Add click handlers for admin navigation
+                document.querySelector('.admin-nav-btn[data-section="dashboard"]').click();
+            });
+
+            // Real-time synchronization functions
+            window.syncPricingConfig = function(newPricing) {
+                window.VideoVentaConfig.pricing = newPricing;
+                calculatePrice();
+            };
+
+            window.syncWhatsAppConfig = function(newConfig) {
+                window.VideoVentaConfig.whatsappNumber = newConfig.number;
+                window.VideoVentaConfig.businessName = newConfig.businessName;
+                
+                // Update all bound elements
+                document.querySelectorAll('[data-bind="config.whatsappNumber"]').forEach(el => {
+                    el.textContent = newConfig.number;
+                });
+            };
+        })();
+    </script>
+</body>
+</html>
